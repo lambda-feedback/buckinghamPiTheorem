@@ -1,9 +1,6 @@
 import unittest
 
-try:
-    from .preview import Params, preview_function
-except ImportError:
-    from preview import Params, preview_function
+from .preview import preview_function
 
 
 class TestPreviewFunction(unittest.TestCase):
@@ -25,12 +22,20 @@ class TestPreviewFunction(unittest.TestCase):
     as it should.
     """
 
-    def test_returns_preview_key(self):
-        response, params = "test", Params()
+    def test_buckingham_pi_one_group(self):
+        params = {"strict_syntax": False}
+        response = "A/r**2"
         result = preview_function(response, params)
+        self.assertEqual(result["preview"]["latex"], r"~\mathrm{A} ~\mathrm{r}^{-2}")
 
-        self.assertIn("preview", result)
-        self.assertIsNotNone(result["preview"])
+    def test_buckingham_pi_two_groups(self):
+        params = {
+            "quantities": "('U','(length/time)') ('L','(length)') ('nu','(length**2/time)') ('f','(1/time)')",
+            "strict_syntax": False
+        }
+        response = "U*L/nu, (f*L)/U"
+        result = preview_function(response, params)
+        self.assertEqual(result["preview"]["latex"], "\\frac{L U}{\\nu},~\\frac{L f}{U}")
 
 
 if __name__ == "__main__":
