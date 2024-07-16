@@ -14,14 +14,15 @@ class Result(TypedDict):
     is_correct: bool
     feedback: str
 
-
-parsing_feedback_responses = {
+internal_feedback_responses = {
     "NO_RESPONSE": "No response submitted.",
     "NO_ANSWER": "No answer was given.",
+    "QUANTITIES_NOT_WRITTEN_CORRECTLY": "List of quantities not written correctly.",
+}
+
+parsing_feedback_responses = {
     "PARSE_ERROR_WARNING": lambda x: f"`{x}` could not be parsed as a valid mathematical expression. Ensure that correct notation is used, that the expression is unambiguous and that all parentheses are closed.",
     "STRICT_SYNTAX_EXPONENTIATION": "Note that `^` cannot be used to denote exponentiation, use `**` instead.",
-    "QUANTITIES_NOT_WRITTEN_CORRECTLY": "List of quantities not written correctly.",
-    "SUBSTITUTIONS_NOT_WRITTEN_CORRECTLY": "List of substitutions not written correctly.",
 }
 
 
@@ -185,9 +186,9 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     answer = answer.strip()
     response = response.strip()
     if len(answer) == 0:
-        raise Exception(feedback=parsing_feedback_responses["No answer was given."])
+        raise Exception(feedback=internal_feedback_responses["NO_ANSWER"])
     if len(response) == 0:
-        return Result(is_correct=False, feedback=parsing_feedback_responses["NO_RESPONSE"])
+        return Result(is_correct=False, feedback=internal_feedback_responses["NO_RESPONSE"])
 
     # Preprocess answer and response to prepare for parsing by sympy
     unsplittable_symbols = names_of_prefixes_units_and_dimensions
@@ -260,7 +261,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
                 quantity = tuple(map(lambda x: parse_expression(x, parsing_params), quantity_strings))
                 quantities.append(quantity)
             except Exception:
-                raise Exception(parsing_feedback_responses["QUANTITIES_NOT_WRITTEN_CORRECTLY"])
+                raise Exception(internal_feedback_responses["QUANTITIES_NOT_WRITTEN_CORRECTLY"])
             index = quantities_strings.find('(', index_match+1)
         response_symbols = list(map(lambda x: x[0], quantities))
         answer_symbols = response_symbols
