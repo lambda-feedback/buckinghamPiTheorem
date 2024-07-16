@@ -1,6 +1,5 @@
 from typing import Any, TypedDict
-from sympy.parsing.sympy_parser import parse_expr
-from sympy import latex, Matrix, Symbol, Integer, Add, posify, prod
+from sympy import latex, Matrix, Integer, Add, posify, prod
 
 from .buckingham_pi_utilities import names_of_prefixes_units_and_dimensions, find_matching_parenthesis
 from .expression_utilities import preprocess_expression, parse_expression, create_sympy_parsing_params
@@ -17,6 +16,8 @@ class Result(TypedDict):
 
 
 parsing_feedback_responses = {
+    "NO_RESPONSE": "No response submitted.",
+    "NO_ANSWER": "No answer was given.",
     "PARSE_ERROR_WARNING": lambda x: f"`{x}` could not be parsed as a valid mathematical expression. Ensure that correct notation is used, that the expression is unambiguous and that all parentheses are closed.",
     "STRICT_SYNTAX_EXPONENTIATION": "Note that `^` cannot be used to denote exponentiation, use `**` instead.",
     "QUANTITIES_NOT_WRITTEN_CORRECTLY": "List of quantities not written correctly.",
@@ -67,37 +68,6 @@ def get_exponent_matrix(expressions, symbols):
     return Matrix(exponents_list)
 
 
-def string_to_expressions(string):
-    beta = Symbol("beta")
-    gamma = Symbol("gamma")
-    zeta = Symbol("zeta")
-    # e = E
-    E = Symbol("E")
-    abstract_I = Symbol("I")
-    abstract_O = Symbol("O")
-    N = Symbol("N")
-    Q = Symbol("Q")
-    S = Symbol("S")
-    symbol_dict = {
-        "beta": beta,
-        "gamma": gamma,
-        "zeta": zeta,
-        "I": abstract_I,
-        "N": N,
-        "O": abstract_O,
-        "Q": Q,
-        "S": S,
-        "E": E
-    }
-    expressions = [parse_expr(expr, local_dict=symbol_dict).expand(power_base=True, force=True) for expr in string.split(',')]
-    symbols = set()
-    for expression in expressions:
-        expr = expression.simplify()
-        expr = expr.expand(power_base=True, force=True)
-        symbols = symbols.union(expression.free_symbols)
-    return expressions, symbols
-
-
 def create_power_product(exponents, symbols):
     return prod([s**i for (s, i) in zip(symbols, exponents)])
 
@@ -145,7 +115,6 @@ def determine_validity(reference_set, reference_symbols, reference_original_numb
         valid = False
     feedback = [elem.strip() for elem in feedback if len(elem.strip()) > 0]
     return valid, line_break.join(feedback)
-
 
 def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     """
@@ -216,9 +185,9 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     answer = answer.strip()
     response = response.strip()
     if len(answer) == 0:
-        raise Exception("No answer was given.")
+        raise Exception(feedback=parsing_feedback_responses["No answer was given."])
     if len(response) == 0:
-        return Result(is_correct=False, feedback="No response submitted.")
+        return Result(is_correct=False, feedback=parsing_feedback_responses["NO_RESPONSE"])
 
     # Preprocess answer and response to prepare for parsing by sympy
     unsplittable_symbols = names_of_prefixes_units_and_dimensions
@@ -373,5 +342,5 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
         return result
 
     result["is_correct"] = valid
-    result["feedback"] = feedback_string+buckingham_pi_feedback_responses["SUM_WITH_INDEPENDENT_TERMS"]("response")+remark
+    result["feedback"] = feedback_string+remark
     return result

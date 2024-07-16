@@ -102,7 +102,6 @@ class TestEvaluationFunction(unittest.TestCase):
                 params,
             )
 
-
     def test_buckingham_pi_unknown_symbols(self):
         answer = "a*b*c"
         params = {
