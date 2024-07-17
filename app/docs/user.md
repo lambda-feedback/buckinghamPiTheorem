@@ -3,16 +3,16 @@
 Checks that the set of quantities in the response matches the set of quantities in the sense given by the Buckingham Pi theorem.
 
 There are three different ways of supplying this function with the necessary information.
-- In the answer, provide an example set of groups as a comma seprated list. When used this way the function assumes that the given list is correct and contains at least the minimum number of groups.
+- In the answer, provide an example set of groups as a comma separated list. When used this way the function assumes that the given list is correct and contains at least the minimum number of groups.
 - In the `quantities` parameter, supply a list of what the dimensions for each quantity is and set answer to `-`. The function will then compute a list of sufficiently many independent dimensionless quantities and compare to the response.
 - In the `quantities` parameter, supply a list of what the dimensions for each quantity is and in the answer, supply a list of groups as in the first option. The function will then check that the supplied answer is dimensionless and has a sufficient number of independent groups before comparing it to the response.
 
-Note that in lists of groups the items should ideally be written on the form $q_1^{c_1} \cdot q_2^{c_2} \cdots q_n^{c_n}$ where $q_1, q_2 \ldots q_n$ are quantities and $c_1, c_2 \ldots c_n$ are integers, but the function can also handle item that are sums with terms written on the form $a \cdot q_1^{c_1} \cdot q_2^{c_2} \cdots q_n^{c_n}$ where $q_1, q_2 \ldots q_n$ are quantities, $c_1, c_2 \ldots c_n$ rational numbers and $a$ a constant. If the total number of groups is less than required the set of groups is considered invalid, even if there is a sufficient number of terms with independent power products in the response.
+Note that in lists of groups the items should ideally be written in the form $q_1^{c_1} \cdot q_2^{c_2} \cdots q_n^{c_n}$ where $q_1, q_2 \ldots q_n$ are quantities and $c_1, c_2 \ldots c_n$ are integers, but the function can also handle item that are sums with terms written in the form $a \cdot q_1^{c_1} \cdot q_2^{c_2} \cdots q_n^{c_n}$ where $q_1, q_2 \ldots q_n$ are quantities, $c_1, c_2 \ldots c_n$ rational numbers and $a$ a constant. If the total number of groups is less than required the set of groups is considered invalid, even if there is a sufficient number of terms with independent power products in the response.
 
 ## Inputs
 All input parameters need to be supplied via the **Grading parameters** panel.
 
-There are seven optional parameters that can be set: `elementary_functions`, `substitutions`, `quantities`, `strict_syntax`, `rtol`, `atol` and `comparison`.
+There are four optional parameters that can be set: `custom_feedback`, `elementary_functions`, `quantities`, `strict_syntax`.
 
 ## `custom_feedback`
 
@@ -48,7 +48,7 @@ Whenever units are used they must be written exactly as in the left columns of t
 
 #### Table: Base SI units
 
-SI base units taken from Table 1 of https://physics.nist.gov/cuu/Units/units.html
+SI base units taken from Table 1 of the [NIST Guide to the SI, Chapter 4: The Two Classes of SI Units and the SI Prefixes](https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-4-two-classes-si-units-and-si-prefixes)
 
 Note that gram is used as a base unit instead of kilogram.
 
@@ -64,56 +64,26 @@ Note that gram is used as a base unit instead of kilogram.
 
 #### Table: SI prefixes
 
-SI base units taken from Table 5 of https://physics.nist.gov/cuu/Units/prefixes.html
+SI base units taken from Table 5 of [NIST Guide to the SI, Chapter 4: The Two Classes of SI Units and the SI Prefixes](https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-4-two-classes-si-units-and-si-prefixes)
 
 | SI Prefix | Symbol | Factor     | | SI Prefix | Symbol | Factor     |
 |-----------|:-------|:-----------|-|-----------|:-------|:-----------|
-| yotta     |   Y    | $10^{24}$  | | deci      |   d    | $10^{-1}$  |
-| zetta     |   Z    | $10^{21}$  | | centi     |   c    | $10^{-2}$  |
-| exa'      |   E    | $10^{18}$  | | milli     |   m    | $10^{-3}$  |
-| peta      |   P    | $10^{15}$  | | micro     |   mu   | $10^{-6}$  |
-| tera      |   T    | $10^{12}$  | | nano      |   n    | $10^{-9}$  |
-| giga      |   G    | $10^{9}$   | | pico      |   p    | $10^{-12}$ |
-| mega      |   M    | $10^{6}$   | | femto     |   f    | $10^{-15}$ |
-| kilo      |   k    | $10^{3}$   | | atto      |   a    | $10^{-18}$ |
-| hecto     |   h    | $10^{2}$   | | zepto     |   z    | $10^{-21}$ |
-| deka      |   da   | $10^{1}$   | | yocto     |   y    | $10^{-24}$ |
-
-#### Table: Derived SI units
-
-Derived SI units taken from Table 3 of https://physics.nist.gov/cuu/Units/units.html
-
-Note that degrees Celsius is omitted.
-
-Note that the function treats radians and steradians as dimensionless values.
-
-| Unit name | Symbol | Expressed in base SI units                                                       |
-|-----------|:-------|:---------------------------------------------------------------------------------|
-| radian    |   r    | 1                                                                                |
-| steradian |  sr    | 1                                                                                |
-| hertz     |  Hz    | $\mathrm{second}^{-1}$                                                           |
-| newton    |   N    | $\mathrm{metre}~\mathrm{kilogram}~\mathrm{second}^{-2}$                          |
-| pascal    |  Pa    | $\mathrm{metre}^{-1}~\mathrm{kilogram}~\mathrm{second}^{-2}$                     |
-| joule     |   J    | $\mathrm{metre}^2~\mathrm{kilogram~second}^{-2}$                                 |
-| watt      |   W    | $\mathrm{metre}^2~\mathrm{kilogram~second}^{-3}$                                 |
-| coulomb   |   C    | $\mathrm{second~ampere}$                                                         |
-| volt      |   V    | $\mathrm{metre}^2~\mathrm{kilogram second}^{-3}~\mathrm{ampere}^{-1}$            |
-| farad     |   F    | $\mathrm{metre}^{-2}~\mathrm{kilogram}^{-1}~\mathrm{second}^4~\mathrm{ampere}^2$ |
-| ohm       |   O    | $\mathrm{metre}^2~\mathrm{kilogram second}^{-3}~\mathrm{ampere}^{-2}$            |
-| siemens   |   S    | $\mathrm{metre}^{-2}~\mathrm{kilogram}^{-1}~\mathrm{second}^3~\mathrm{ampere}^2$ |
-| weber     |  Wb    | $\mathrm{metre}^2~\mathrm{kilogram~second}^{-2}~\mathrm{ampere}^{-1}$            |
-| tesla     |   T    | $\mathrm{kilogram~second}^{-2} \mathrm{ampere}^{-1}$                             |
-| henry     |   H    | $\mathrm{metre}^2~\mathrm{kilogram~second}^{-2}~\mathrm{ampere}^{-2}$            |
-| lumen     |  lm    | $\mathrm{candela}$                                                               |
-| lux       |  lx    | $\mathrm{metre}^{-2}~\mathrm{candela}$                                           |
-| becquerel |  Bq    | $\mathrm{second}^{-1}$                                                           |
-| gray      |  Gy    | $\mathrm{metre}^2~\mathrm{second}^{-2}$                                          |
-| sievert   |  Sv    | $\mathrm{metre}^2~\mathrm{second}^{-2}$                                          |
-| katal     |  kat   | $\mathrm{mole~second}^{-1}$                                                      |
+| quetta    |   Q    | $10^{30}$  | | deci      |   d    | $10^{-1}$  |
+| ronna     |   R    | $10^{27}$  | | centi     |   c    | $10^{-2}$  |
+| yotta     |   Y    | $10^{24}$  | | milli     |   m    | $10^{-3}$  |
+| zetta     |   Z    | $10^{21}$  | | micro     |   mu   | $10^{-6}$  |
+| exa'      |   E    | $10^{18}$  | | nano      |   n    | $10^{-9}$  |
+| peta      |   P    | $10^{15}$  | | pico      |   p    | $10^{-12}$ |
+| tera      |   T    | $10^{12}$  | | femto     |   f    | $10^{-15}$ |
+| giga      |   G    | $10^{9}$   | | atto      |   a    | $10^{-18}$ |
+| mega      |   M    | $10^{6}$   | | zepto     |   z    | $10^{-21}$ |
+| kilo      |   k    | $10^{3}$   | | yocto     |   y    | $10^{-24}$ |
+| hecto     |   h    | $10^{2}$   | | ronto     |   r    | $10^{-27}$ |
+| deka      |   da   | $10^{1}$   | | quecto    |   q    | $10^{-30}$ |
 
 #### Table: Common non-SI units
 
-Commonly used non-SI units taken from Table 6 and 7 of https://physics.nist.gov/cuu/Units/outside.html
+Commonly used non-SI units taken from Table 6 and 7 of [NIST Guide to the SI, Chapter 5: Units Outside the SI](https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-4-two-classes-si-units-and-si-prefixes)
 
 Note that the function treats angles, neper and bel as dimensionless values.
 
@@ -151,7 +121,7 @@ Note that only the first table in this section has short form symbols defined, t
 
 #### Table: Imperial units
 
-Commonly imperial units taken from https://en.wikipedia.org/wiki/Imperial_units
+Commonly used imperial units taken from [Wikipedia: Imperial units](https://en.wikipedia.org/wiki/Imperial_units)
 
 | Unit name         | Symbol | Expressed in SI units                         |
 |-------------------|:-------|:----------------------------------------------|

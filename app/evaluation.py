@@ -325,7 +325,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
         return result
     answer_symbols = list(answer_symbols)
 
-    # Check ing the given response is a valid set of groups
+    # Checking if the given response is a valid set of groups
     reference_set = set(answer_groups)
     reference_symbols = set(answer_symbols)
     candidate_set = set(response_groups)
