@@ -156,6 +156,10 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     # replace the corresponding entries in the feedback response
     # dictionaries, wrapping pure stings in a function that takes
     # an arbitrary number of arguments when necessary
+    # NOTE: Changing the entries in this way is known to cause
+    # undesired behaviour when used in the lambda-feedback web
+    # client, it will be fixed after the discussion with other
+    # members of the development team
     custom_feedback = params.get("custom_feedback", None)
     if custom_feedback is not None:
         for feedback_responses in feedback_responses_list:
