@@ -77,9 +77,7 @@ By default `strict_syntax` is set to true.
 
 Implemented versions of these examples can be found in the module 'Examples: Evaluation Functions'.
 
-### 1 Checking if a set of quantities match the Buckingham pi theorem
-
-#### a)
+### 1) Example where a valid set have one group
 
 In this example the task is: Given $U$, $L$ and $\nu$, suggest a dimensionless group.
 
@@ -91,7 +89,16 @@ For this example an EXPRESSION response area is used with answer set to `U*L/nu`
 
 With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false. Since `nu` is a multicharacter symbol it needs to be added as an input symbol.
 
-#### b)
+#### Examples of responses that illustrate the evaluation functions capabilities
+
+- `U*L/nu` a valid group
+- `U*L/nu+1` a valid group
+- `8*U*L/nu` a valid group
+- `q*U*L/nu` a group with an unknown symbol
+- `U*L/nu, nu/U/L` two dimensionless groups that are not independent
+- `U*L` group that is not dimensionless
+
+### 2) Example where a valid sets have two groups
 
 In this example the task is: Given $U$, $L$, $\nu$ and $f$, determine the necessary number of dimensionless groups and give one example of possible expressions for them.
 
@@ -101,12 +108,23 @@ For this example an EXPRESSION response area is used with `quantities` set to `(
 
 With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false. Since `nu` is a multicharacter symbol it needs to be added as an input symbol.
 
-#### c)
+#### Examples of responses that illustrate the evaluation functions capabilities
+
+- `U*L/nu, f*L/U` a valid set of groups
+- `8*U*L/nu, f*L/U+1` a valid set of groups
+- `U*L/nu+f*L/U` sum that contains two valid groups does not count as valid
+- `U*L/nu+f*L/U, f*L/U` sum that contains two valid groups does count as valid if the total number of groups is sufficient
+- `U*L/nu` too few groups
+- `U*L/nu, f*L/U, U/f/L` too many groups
+- `U*L/nu, f/U` two groups where one is not dimensionless
+- `L/nu, f/U` two groups where neither group is dimensionless
+
+### 3) Example with customised feedback messages
 
 In this example the task is:
-Suppose we are studying water waves that move under the influence of gravity. We suppose that the variables of interest are the acceleration in free fall $g$, the velocity of the wave $v$, the height of the wave $h$ and the wave length $\ell$. We also suppose that they are related by a dimensionally consistent equation $f(g,v,h,l) = 0$. Determine the minimum number of dimensionless $\pi$-variables needed to describe this problem according to the Buckingham pi-theorem and give one example of possible expressions for the dimensionless quantities.
+Suppose we are studying water waves that move under the influence of gravity. We suppose that the variables of interest are the acceleration in free fall $g$, the velocity of the wave $v$, the height of the wave $h$ and the wave length $\ell$. We also suppose that they are related by a dimensionally consistent equation $f(g,v,h,\ell) = 0$. Determine the minimum number of dimensionless $\pi$-variables needed to describe this problem according to the Buckingham pi-theorem and give one example of possible expressions for the dimensionless quantities.
 
-For this problem two dimensionless groups are needed, see the worked solution for a terse solution that gives the general form of the dimensionless quantities.
+For this problem two dimensionless groups are needed, see the worked solution at the bottom of this example for a terse solution that gives the general form of the dimensionless quantities.
 
 For this example an EXPRESSION response area is used and the answer  `g**(-2)*v**4*h*l**3, g**(-2)*v**4*h**2*l**4` (this corresponds to $p_1 = 1$, $p_2 = 2$, $q_1 = 3$, $q_2 = 4$ in the worked solution shown in the examples module). The feedback was customised by setting the `custom_feedback` parameter too:
 `"custom_feedback": {
@@ -120,3 +138,25 @@ For this example an EXPRESSION response area is used and the answer  `g**(-2)*v*
 }`
 
 With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false.
+
+#### Examples of responses that illustrate the customized feedback messages
+
+- `g*v**(-2)*h**3*l**2, g**2*v**(-4)*h**3*l` a valid set of power products
+- `h*l, h**2*l**2` two power products that are not independent
+- `g**1*v**2*h**3*l**4, g**4*v**3*h**2*l**1` two power products that are not dimensionless
+- `g**(-2)*v**4*h*l**3, g**(-2)*v**4*h**2*l**4, g**(-1)*v**2*h` set of three power products where any two power products together creates a valid set
+- `q*g**(-2)*v**4*h*l**3, g**(-2)*v**4*h**2*l**4` two power products where one has an undefined symbol, i.e. `q`
+- `g**(-2)*v**4*h*l**3+g**(-2)*v**4*h**2*l**4` two power products in a sum instead of written as a set
+
+#### Terse solution giving the general form of a valid set of groups
+
+We have the following dimensions:
+$[a] = LT^{-2}$, $[v] = LT^{-1}$, $[h] = L$, $[\ell] = L$
+This gives the dimensional matrix:
+$A = \begin{pmatrix} 1 & -2 \\ 1 & -1 \\ 1 & 0 \\ 1 & 0 \end{pmatrix}$
+Gaussian elimination can be used to how that $r=\mathrm{rank}(A)$. With $m=3$ quantities it follows from the Buckingham Pi theorem that we need $m-r = 2$ dimensionless quantities $\pi_1$ and $\pi_2$.
+
+For $\pi_i$, $i \in \{1,2\}$ the following holds:
+$[\pi_i] = [g]^{a_i} [v]^{b_i} [h]^{c_i} [l]^{d_i} = L^{a_i+b_i+c_i+d_i} T^{-2a_i-b_i}$
+
+$\Rightarrow \begin{cases} a_i+b_i+c_i+d_i = 0, \\ -2a_i-b_i = 0 \end{cases} \Rightarrow \begin{cases} a_i = p_i-q_i, \\ b_i = -2a_i \\ c_i = -p_i \\ d_i = -q_i \end{cases}$, where $p_i$ and $q_i$ ($i \in \{1,2\}$) are arbitrarily chosen integers. Thus $\pi_1$ and $\pi_2$ will be independent unless $\frac{a_1}{a_2} = \frac{b_1}{b_2} = \frac{c_1}{c_2} = \frac{d_1}{d_2}$ which in this case means that $\pi_i$ and $\pi_2$ are independent if $\frac{p_1}{p_2} \neq \frac{q_1}{q_2}$.
