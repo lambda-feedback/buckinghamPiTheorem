@@ -122,7 +122,7 @@ With default settings it is required to put `*` (or `/`) between each part of th
 ### 3) Example with customised feedback messages
 
 In this example the task is:
-Suppose we are studying water waves that move under the influence of gravity. We suppose that the variables of interest are the acceleration in free fall $g$, the velocity of the wave $v$, the height of the wave $h$ and the wave length $\ell$. We also suppose that they are related by a dimensionally consistent equation $f(g,v,h,\ell) = 0$. Determine the minimum number of dimensionless $\pi$-variables needed to describe this problem according to the Buckingham pi-theorem and give one example of possible expressions for the dimensionless quantities.
+Suppose we are studying water waves that move under the influence of gravity. We suppose that the variables of interest are the acceleration in free fall $g$, the velocity of the wave $v$, the height of the wave $h$ and the wave length $\ell$. We also suppose that they are related by a dimensionally complete equation $f(g,v,h,\ell) = 0$. Determine the minimum number of dimensionless power products describe this problem according to the Buckingham Pi theorem and give one example of a valid set of power products.
 
 For this problem two dimensionless groups are needed, see the worked solution at the bottom of this example for a terse solution that gives the general form of the dimensionless quantities.
 
@@ -132,9 +132,9 @@ For this example an EXPRESSION response area is used and the answer  `g**(-2)*v*
     "NOT_DIMENSIONLESS": "At least one power product is not dimensionless.",
     "MORE_GROUPS_THAN_REFERENCE_SET": "Response has more power products than necessary.",
     "CANDIDATE_GROUPS_NOT_INDEPENDENT": "Power products in response are not independent.",
-    "TOO_FEW_INDEPENDENT_GROUPS": "Candidate set contains too few independent groups.",
+    "TOO_FEW_INDEPENDENT_GROUPS": "Candidate set contains too few independent power products.",
     "UNKNOWN_SYMBOL": "One of the prower products contains an unkown symbol.",
-    "SUM_WITH_INDEPENDENT_TERMS": "The candidate set contains an expression which contains more independent terms that there are groups in total. The candidate set should ideally only contain expressions written as power products."
+    "SUM_WITH_INDEPENDENT_TERMS": "The candidate set contains an expression which contains more independent terms that there are power products in total. The candidate set should ideally only contain expressions written as power products."
 }`
 
 With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false.
