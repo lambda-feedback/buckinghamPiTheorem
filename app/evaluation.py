@@ -1,7 +1,7 @@
 from typing import Any, TypedDict
 from sympy import latex, Matrix, Integer, Add, posify, prod
 
-from .buckingham_pi_utilities import names_of_prefixes_units_and_dimensions, find_matching_parenthesis
+from .buckingham_pi_utilities import names_of_dimensions, find_matching_parenthesis
 from .expression_utilities import preprocess_expression, parse_expression, create_sympy_parsing_params
 from .preview import preview_function
 
@@ -13,6 +13,7 @@ class Params(TypedDict):
 class Result(TypedDict):
     is_correct: bool
     feedback: str
+
 
 internal_feedback_responses = {
     "NO_RESPONSE": "No response submitted.",
@@ -117,6 +118,7 @@ def determine_validity(reference_set, reference_symbols, reference_original_numb
     feedback = [elem.strip() for elem in feedback if len(elem.strip()) > 0]
     return valid, line_break.join(feedback)
 
+
 def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     """
     Function used to evaluate a student response.
@@ -195,7 +197,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
         return Result(is_correct=False, feedback=internal_feedback_responses["NO_RESPONSE"])
 
     # Preprocess answer and response to prepare for parsing by sympy
-    unsplittable_symbols = names_of_prefixes_units_and_dimensions
+    unsplittable_symbols = names_of_dimensions
     answer, response = preprocess_expression([answer, response], parameters)
     parsing_params = create_sympy_parsing_params(parameters, unsplittable_symbols=unsplittable_symbols)
 

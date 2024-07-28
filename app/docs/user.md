@@ -1,17 +1,24 @@
 # buckinghamPiTheorem
 
-Checks that the set of quantities in the response matches the set of quantities in the sense given by the Buckingham Pi theorem.
+Evaluates a candidate list of power products (e.g. `U*L/nu`, `p/rho/U^2`) for validity as a set of dimensionless quantities that satisfy the Buckingham Pi theorem. Uses a modified  version of the algorithm described in [Automated feedback on student attempts to produce a set of dimensionless power products from a list of quantities that describe a physical problem](https://doi.org/10.6084/m9.figshare.24850131)
 
 There are three different ways of supplying this function with the necessary information.
-- In the answer, provide an example set of groups as a comma separated list. When used this way the function assumes that the given list is correct and contains at least the minimum number of groups.
-- In the `quantities` parameter, supply a list of what the dimensions for each quantity is and set answer to `-`. The function will then compute a list of sufficiently many independent dimensionless quantities and compare to the response.
-- In the `quantities` parameter, supply a list of what the dimensions for each quantity is and in the answer, supply a list of groups as in the first option. The function will then check that the supplied answer is dimensionless and has a sufficient number of independent groups before comparing it to the response.
+1. In `answer`, provide an example set of groups as a comma separated list. When used this way the function assumes that the given example is a valid set containing the minimum number of groups.
+2. In the `quantities` parameter, supply a comma-separated list of the dimensions for each quantity and set `answer` to `-`. The function will then compute a list of sufficiently many independent dimensionless quantities and compare to the response.
+3. Fill in the `answer` as per option **1** and `quantities` as per option **2**. The function will then confirm that the supplied `answer` is dimensionless and valid before comparing it to the response. If the supplied `answer` is not valid the function will return an error regardless of the response.
 
-Note that in lists of groups the items should ideally be written in the form $q_1^{c_1} \cdot q_2^{c_2} \cdots q_n^{c_n}$ where $q_1, q_2 \ldots q_n$ are quantities and $c_1, c_2 \ldots c_n$ are integers, but the function can also handle item that are sums with terms written in the form $a \cdot q_1^{c_1} \cdot q_2^{c_2} \cdots q_n^{c_n}$ where $q_1, q_2 \ldots q_n$ are quantities, $c_1, c_2 \ldots c_n$ rational numbers and $a$ a constant. If the total number of groups is less than required the set of groups is considered invalid, even if there is a sufficient number of terms with independent power products in the response.
+Note that in lists of groups the items should ideally be written as power products, i.e. in the form $q_1^{c_1} \cdot q_2^{c_2} \cdots q_n^{c_n}$ where $q_1, q_2 \ldots q_n$ are quantities and $c_1, c_2 \ldots c_n$ are integers. For example, consider a task where $\frac{U L}{\nu}, \frac{nu}{f L^2}$ is a valid set:
+- The responses `U*L/nu, nu/(f*L^2)` and `U L nu^(-1), nu f^(-1) L^(-2)` are examples of responses written in the ideal format,
+- The response `U^(0.33)*L^(0.33)/nu^(0.33), nu/(f*L^2)^(2/3)` is theoretically valid, but can cause unexpected behaviour during comparison with response, due to non-integer exponents,
+- `sin(U*L/nu), log(nu/(f*L^2)^(2/3))` will not be accepted since the two expressions are not power products.
+
+The function can also handle sums of power products multiplied by constants. If the total number of groups is less than required the set of groups is considered invalid, even if there is a sufficient number of terms with independent power products in the response.
+For example, consider a task where $\frac{U L}{\nu}, \frac{nu}{f L^2}$ is a valid set:
+- The response `U*L/nu+1, nu/(f*L^2)+U*L/nu` will be considered valid, since there are two groups in the response, and if each term is considered separately the result is three different power products `U*L/nu`, `1` and `nu/(f*L^2)`, and the two non-constant expressions, `U*L/nu` and `nu/(f*L^2)`, are independent,
+- The response `U*L/nu+1, nu/(f*L^2)+U/(f*L)` will be considered valid, since there are two groups in the response, and if each term is considered separately the result is four expressions `U*L/nu`, `1`, `nu/(f*L^2)` and `U/(f*L)` but only two of them, `U*L/nu` and `nu/(f*L^2)`, are independent (since `U/(f*L)` is equal to `U*L/nu * nu/(f*L^2)`),
+- The response `U*L/nu+nu/(f*L^2)` will not be considered valid because even though the terms considered separately gives enough independent dimensionless power products, the response has too few expressions. 
 
 ## Inputs
-All input parameters need to be supplied via the **Grading parameters** panel.
-
 There are four optional parameters that can be set: `custom_feedback`, `elementary_functions`, `quantities`, `strict_syntax`.
 
 ## `custom_feedback`
@@ -42,101 +49,21 @@ When using implicit multiplication function names with mulitple characters are s
 
 String that lists all quantities that can be used in the answer and response.
 
-Each quantity should be written in the form `('quantity name','(units)')` and all pairs concatenated into a single string. See tables below for available default units.
-
-Whenever units are used they must be written exactly as in the left columns of the tables given below (no short forms or single-character symbols) and units must be multiplied (or divided) by each other, as well as any accompanying quantities. 
+Each quantity should be written in the form `('quantity name','(dimensions)')` and all pairs concatenated into a single string. See tables below for available default dimensions.
 
 #### Table: Base SI units
 
-SI base units taken from Table 1 of the [NIST Guide to the SI, Chapter 4: The Two Classes of SI Units and the SI Prefixes](https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-4-two-classes-si-units-and-si-prefixes)
+Default dimensions correspond to the base quantities in Table 1 of the [NIST Guide to the SI, Chapter 4: The Two Classes of SI Units and the SI Prefixes](https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-4-two-classes-si-units-and-si-prefixes)
 
-Note that gram is used as a base unit instead of kilogram.
-
-| SI base unit | Symbol | Dimension name      |
-|--------------|:-------|:--------------------|
-| metre        |   m    | length              |
-| gram         |   g    | mass                |
-| second       |   s    | time                |
-| ampere       |   A    | electriccurrent     |
-| kelvin       |   k    | temperature         |
-| mole         |  mol   | amountofsubstance   |
-| candela      |  cd    | luminousintensity   |
-
-#### Table: SI prefixes
-
-SI base units taken from Table 5 of [NIST Guide to the SI, Chapter 4: The Two Classes of SI Units and the SI Prefixes](https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-4-two-classes-si-units-and-si-prefixes)
-
-| SI Prefix | Symbol | Factor     | | SI Prefix | Symbol | Factor     |
-|-----------|:-------|:-----------|-|-----------|:-------|:-----------|
-| quetta    |   Q    | $10^{30}$  | | deci      |   d    | $10^{-1}$  |
-| ronna     |   R    | $10^{27}$  | | centi     |   c    | $10^{-2}$  |
-| yotta     |   Y    | $10^{24}$  | | milli     |   m    | $10^{-3}$  |
-| zetta     |   Z    | $10^{21}$  | | micro     |   mu   | $10^{-6}$  |
-| exa'      |   E    | $10^{18}$  | | nano      |   n    | $10^{-9}$  |
-| peta      |   P    | $10^{15}$  | | pico      |   p    | $10^{-12}$ |
-| tera      |   T    | $10^{12}$  | | femto     |   f    | $10^{-15}$ |
-| giga      |   G    | $10^{9}$   | | atto      |   a    | $10^{-18}$ |
-| mega      |   M    | $10^{6}$   | | zepto     |   z    | $10^{-21}$ |
-| kilo      |   k    | $10^{3}$   | | yocto     |   y    | $10^{-24}$ |
-| hecto     |   h    | $10^{2}$   | | ronto     |   r    | $10^{-27}$ |
-| deka      |   da   | $10^{1}$   | | quecto    |   q    | $10^{-30}$ |
-
-#### Table: Common non-SI units
-
-Commonly used non-SI units taken from Table 6 and 7 of [NIST Guide to the SI, Chapter 5: Units Outside the SI](https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-4-two-classes-si-units-and-si-prefixes)
-
-Note that the function treats angles, neper and bel as dimensionless values.
-
-Note that only the first table in this section has short form symbols defined, the second table does not.
-
-| Unit name         | Symbol | Expressed in SI units                      |
-|-------------------|:-------|:-------------------------------------------|
-| minute            |  min   | $60~\mathrm{second}$                       |
-| hour              |   h    | $3600~\mathrm{second}$                     |
-| degree            |  deg   | $\frac{\pi}{180}$                          |
-| liter             |   l    | $10^{-3}~\mathrm{metre}^3$                 |
-| metric_ton        |   t    | $10^3~\mathrm{kilogram}$                   |
-| neper             |  Np    | $1$                                        |
-| bel               |   B    | $\frac{1}{2}~\ln(10)$                      |
-| electronvolt      |  eV    | $1.60218 \cdot 10^{-19}~\mathrm{joule}$    |
-| atomic_mass_unit  |   u    | $1.66054 \cdot 10^{-27}~\mathrm{kilogram}$ |
-| angstrom          |   å    | $10^{-10}~\mathrm{metre}$                  |
-
-| Unit name        | Expressed in SI units                                |
-|------------------|:-----------------------------------------------------|
-| day              | $86400~\mathrm{second}$                              |
-| angleminute      | $\frac{\pi}{10800}$                                  |
-| anglesecond      | $\frac{\pi}{648000}$                                 |
-| astronomicalunit | $149597870700~\mathrm{metre}$                        |
-| nauticalmile     | $1852~\mathrm{metre}$                                |
-| knot             | $\frac{1852}{3600}~\mathrm{metre~second}^{-1}$       |
-| are              | $10^2~\mathrm{metre}^2$                              |
-| hectare          | $10^4~\mathrm{metre}^2$                              |
-| bar              | $10^5~\mathrm{pascal}$                               |
-| barn             | $10^{-28}~\mathrm{metre}$                            |
-| curie            | $3.7 \cdot 10^{10}~\mathrm{becquerel}                |
-| roentgen         | $2.58 \cdot 10^{-4}~\mathrm{kelvin~(kilogram)}^{-1}$ |
-| rad              | $10^{-2}~\mathrm{gray}$                              |
-| rem              | $10^{-2}~\mathrm{sievert}$                           |
-
-#### Table: Imperial units
-
-Commonly used imperial units taken from [Wikipedia: Imperial units](https://en.wikipedia.org/wiki/Imperial_units)
-
-| Unit name         | Symbol | Expressed in SI units                         |
-|-------------------|:-------|:----------------------------------------------|
-| inch              |   in   | $0.0254~\mathrm{metre}$                       |
-| foot              |   ft   | $0.3048~\mathrm{metre}$                       |
-| yard              |   yd   | $0.9144~\mathrm{metre}$                       |
-| mile              |   mi   | $1609.344~\mathrm{metre}$                     |
-| fluid ounce       |  fl oz | $28.4130625~\mathrm{millilitre}$              |
-| gill              |   gi   | $142.0653125~\mathrm{millilitre}$             |
-| pint              |   pt   | $568.26125~\mathrm{millilitre}$               |
-| quart             |   qt   | $1.1365225~\mathrm{litre}$                    |
-| gallon            |   gal  | $4546.09~\mathrm{litre}$                      |
-| ounce             |   oz   | $28.349523125~\mathrm{gram}$                  |
-| pound             |   lb   | $0.45359237~\mathrm{kilogram}$                |
-| stone             |   st   | $6.35029318~\mathrm{kilogram}$                |
+| Dimension name      |
+|---------------------|
+| length              |
+| mass                |
+| time                |
+| electriccurrent     |
+| temperature         |
+| amountofsubstance   |
+| luminousintensity   |
 
 ### `strict_syntax`
 
@@ -162,7 +89,7 @@ For this problem we do not need to predefine any quantities and give exact dimen
 
 For this example an EXPRESSION response area is used with answer set to `U*L/nu`. It is not necessary to use this specific answer, any example of a correct dimensionless group should work.
 
-With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the grading parameter `strict_syntax` is set to false. Since `nu` is a multicharacter symbol it needs to be added as an input symbol.
+With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false. Since `nu` is a multicharacter symbol it needs to be added as an input symbol.
 
 #### b)
 
@@ -172,7 +99,7 @@ This task is similar to example a) with two significant differences. First, addi
 
 For this example an EXPRESSION response area is used with `quantities` set to `('U','(length/time)') ('L','(length)') ('nu','(length**2/time)') ('f','(1/time)')` and `answer` set to `-`.
 
-With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the grading parameter `strict_syntax` is set to false. Since `nu` is a multicharacter symbol it needs to be added as an input symbol.
+With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false. Since `nu` is a multicharacter symbol it needs to be added as an input symbol.
 
 #### c)
 
@@ -192,4 +119,4 @@ For this example an EXPRESSION response area is used and the answer  `g**(-2)*v*
     "SUM_WITH_INDEPENDENT_TERMS": "The candidate set contains an expression which contains more independent terms that there are groups in total. The candidate set should ideally only contain expressions written as power products."
 }`
 
-With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the grading parameter `strict_syntax` is set to false.
+With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false.
