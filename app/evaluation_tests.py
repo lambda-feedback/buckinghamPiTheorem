@@ -322,7 +322,7 @@ class TestEvaluationFunction(unittest.TestCase):
     def test_buckingham_pi_three_groups_with_quantities_with_too_few_independent_groups_in_response(self):
         params = {
             "strict_syntax": False,
-            "quantities": "('f', '(1/second)') ('l', '(metre)') ('U', '(metre/second)') ('h', '(metre)') ('Re', '(1)')",
+            "quantities": "('f', '(1/time)') ('l', '(length)') ('U', '(length/time)') ('h', '(length)') ('Re', '(1)')",
             "symbols": {
                 "f": {"latex": r"\(f\)", "aliases": []},
                 "l": {"latex": r"\(l\)", "aliases": []},
@@ -388,7 +388,7 @@ class TestEvaluationFunction(unittest.TestCase):
 
         params = {
             "strict_syntax": False,
-            "quantities": "('F', '(gram*metre*second**(-2))') ('U', '(metre/second)') ('rho', '(gram/(metre**3))') ('D', '(metre)') ('omega', '(second**(-1))')",
+            "quantities": "('F', '(mass*length*time**(-2))') ('U', '(length/time)') ('rho', '(mass/(length**3))') ('D', '(length)') ('omega', '(time**(-1))')",
             "symbols": {
                     'U': {"latex": r"$U$", "aliases": []},
                     'F': {"latex": r"$F$", "aliases": []},
@@ -512,7 +512,7 @@ class TestEvaluationFunction(unittest.TestCase):
                     "MORE_GROUPS_THAN_REFERENCE_SET": "Response has more power products than necessary.",
                     "CANDIDATE_GROUPS_NOT_INDEPENDENT": "Power products in response are not independent.",
                     "TOO_FEW_INDEPENDENT_GROUPS": "Candidate set contains too few independent groups.",
-                    "UNKNOWN_SYMBOL": "One of the prower products contains an unkown symbol.",
+                    "UNKNOWN_SYMBOL": "One of the power products contains an unknown symbol.",
                     "SUM_WITH_INDEPENDENT_TERMS": "The candidate set contains an expression which contains more independent terms that there are groups in total. The candidate set should ideally only contain expressions written as power products."
                 }
             }
@@ -560,7 +560,7 @@ class TestEvaluationFunction(unittest.TestCase):
         # Aircraft propeller a)
         params = {
             "strict_syntax": False,
-            "quantities": "('F', '(gram*metre*second**(-2))') ('U', '(metre/second)') ('rho', '(gram/(metre**3))') ('D', '(metre)') ('omega', '(second**(-1))')",
+            "quantities": "('F', '(mass*length*time**(-2))') ('U', '(length/time)') ('rho', '(mass/(length**3))') ('D', '(length)') ('omega', '(time**(-1))')",  # Note: units have been replaced with dimensions
             "symbols": {
                 "F": {"latex": r"\(F\)", "aliases": []},
                 "U": {"latex": r"\(U\)", "aliases": []},
@@ -585,7 +585,7 @@ class TestEvaluationFunction(unittest.TestCase):
         # Drag on a ship a)
         params = {
             "strict_syntax": False,
-            "quantities": "('mu', '(gram/metre/second)') ('F', '(gram*metre*second**(-2))') ('U', '(metre/second)') ('rho', '(gram/(metre**3))') ('l', '(metre)') ('B', '(metre)') ('g', '(metre*second**(-2))') ",
+            "quantities": "('mu', '(mass/length/time)') ('F', '(mass*length*time**(-2))') ('U', '(length/time)') ('rho', '(mass/(length**3))') ('l', '(length)') ('B', '(length)') ('g', '(length*time**(-2))') ",
             "symbols": {
                 'F': {"latex": r"$F$", "aliases": ["FD", "fd", "Fd", "F_D", "F_d"]},
                 'U': {"latex": r"$U$", "aliases": ["u"]},

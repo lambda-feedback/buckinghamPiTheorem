@@ -1,7 +1,7 @@
 from typing import Any, TypedDict
 from sympy import latex, Matrix, Integer, Add, posify, prod
 
-from .buckingham_pi_utilities import names_of_prefixes_units_and_dimensions, find_matching_parenthesis
+from .buckingham_pi_utilities import names_of_dimensions, find_matching_parenthesis
 from .expression_utilities import preprocess_expression, parse_expression, create_sympy_parsing_params
 from .preview import preview_function
 
@@ -15,13 +15,15 @@ class Result(TypedDict):
     feedback: str
 
 
-parsing_feedback_responses = {
+internal_feedback_responses = {
     "NO_RESPONSE": "No response submitted.",
     "NO_ANSWER": "No answer was given.",
+    "QUANTITIES_NOT_WRITTEN_CORRECTLY": "List of quantities not written correctly.",
+}
+
+parsing_feedback_responses = {
     "PARSE_ERROR_WARNING": lambda x: f"`{x}` could not be parsed as a valid mathematical expression. Ensure that correct notation is used, that the expression is unambiguous and that all parentheses are closed.",
     "STRICT_SYNTAX_EXPONENTIATION": "Note that `^` cannot be used to denote exponentiation, use `**` instead.",
-    "QUANTITIES_NOT_WRITTEN_CORRECTLY": "List of quantities not written correctly.",
-    "SUBSTITUTIONS_NOT_WRITTEN_CORRECTLY": "List of substitutions not written correctly.",
 }
 
 
@@ -47,7 +49,7 @@ buckingham_pi_feedback_responses = {
     "CANDIDATE_GROUPS_NOT_INDEPENDENT": lambda r, n: f"Groups in response are not independent. It has {r} independent group(s) and contains {n} groups.",
     "TOO_FEW_INDEPENDENT_GROUPS": lambda name, r, n: f"{name} contains too few independent groups. It has {r} independent group(s) and needs at least {n} independent groups.",
     "UNKNOWN_SYMBOL": lambda symbols: "Unknown symbol(s): "+", ".join([convert_to_latex(s) for s in symbols])+".",
-    "SUM_WITH_INDEPENDENT_TERMS": lambda s: f"Sum in {convert_to_latex(s)} contains more independent terms that there are groups in total. Group expressions should ideally be written as a comma-separated list where each item is an entry of the form `q_1**c_1*q_2**c_2*...*q_n**c_n`."
+    "SUM_WITH_INDEPENDENT_TERMS": lambda s: f"Sum in {convert_to_latex(s)} contains more independent terms that there are groups in total. Group expressions should ideally be written as a comma-separated list where each item is an entry of the form $q_1^{c_1} q_2^{c_2}\ldots q_n^{c_n}$."
 }
 
 feedback_responses_list = [parsing_feedback_responses, buckingham_pi_feedback_responses]
@@ -116,6 +118,7 @@ def determine_validity(reference_set, reference_symbols, reference_original_numb
     feedback = [elem.strip() for elem in feedback if len(elem.strip()) > 0]
     return valid, line_break.join(feedback)
 
+
 def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     """
     Function used to evaluate a student response.
@@ -155,6 +158,10 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     # replace the corresponding entries in the feedback response
     # dictionaries, wrapping pure stings in a function that takes
     # an arbitrary number of arguments when necessary
+    # NOTE: Changing the entries in this way is known to cause
+    # undesired behaviour when used in the lambda-feedback web
+    # client, it will be fixed after the discussion with other
+    # members of the development team
     custom_feedback = params.get("custom_feedback", None)
     if custom_feedback is not None:
         for feedback_responses in feedback_responses_list:
@@ -185,12 +192,12 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     answer = answer.strip()
     response = response.strip()
     if len(answer) == 0:
-        raise Exception(feedback=parsing_feedback_responses["No answer was given."])
+        raise Exception(feedback=internal_feedback_responses["NO_ANSWER"])
     if len(response) == 0:
-        return Result(is_correct=False, feedback=parsing_feedback_responses["NO_RESPONSE"])
+        return Result(is_correct=False, feedback=internal_feedback_responses["NO_RESPONSE"])
 
     # Preprocess answer and response to prepare for parsing by sympy
-    unsplittable_symbols = names_of_prefixes_units_and_dimensions
+    unsplittable_symbols = names_of_dimensions
     answer, response = preprocess_expression([answer, response], parameters)
     parsing_params = create_sympy_parsing_params(parameters, unsplittable_symbols=unsplittable_symbols)
 
@@ -260,7 +267,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
                 quantity = tuple(map(lambda x: parse_expression(x, parsing_params), quantity_strings))
                 quantities.append(quantity)
             except Exception:
-                raise Exception(parsing_feedback_responses["QUANTITIES_NOT_WRITTEN_CORRECTLY"])
+                raise Exception(internal_feedback_responses["QUANTITIES_NOT_WRITTEN_CORRECTLY"])
             index = quantities_strings.find('(', index_match+1)
         response_symbols = list(map(lambda x: x[0], quantities))
         answer_symbols = response_symbols
@@ -324,7 +331,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
         return result
     answer_symbols = list(answer_symbols)
 
-    # Check ing the given response is a valid set of groups
+    # Checking if the given response is a valid set of groups
     reference_set = set(answer_groups)
     reference_symbols = set(answer_symbols)
     candidate_set = set(response_groups)

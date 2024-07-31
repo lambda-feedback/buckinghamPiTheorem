@@ -4,7 +4,7 @@ from latex2sympy2 import latex2sympy
 from sympy import latex, Symbol
 
 from .buckingham_pi_utilities import (
-    names_of_prefixes_units_and_dimensions,
+    names_of_dimensions,
     find_matching_parenthesis
 )
 from .expression_utilities import preprocess_expression, parse_expression, create_sympy_parsing_params
@@ -179,7 +179,7 @@ def preview_function(response: Any, params: Params) -> Result:
         else:
             response = parse_latex(response, symbols)
 
-    unsplittable_symbols = names_of_prefixes_units_and_dimensions
+    unsplittable_symbols = names_of_dimensions
 
     parameters = {"comparison": "expression", "strict_syntax": True}
     parameters.update(params)
