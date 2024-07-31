@@ -22,7 +22,6 @@ For example, consider a task where $\frac{U L}{\nu}, \frac{nu}{f L^2}$ is a vali
 There are four optional parameters that can be set: `custom_feedback`, `elementary_functions`, `quantities`, `strict_syntax`.
 
 ## `custom_feedback`
-
 Custom feedback can be set on a per-task basis. **Note:** Custom feedback only supports fixed strings, this means that for some situations the custom feedback cannot be as detailed as the default feedback.
 
 The parameter must be set as a dictionary with keys from the feedback tags listed below. The value for each key can be any string.
@@ -39,9 +38,29 @@ The parameter must be set as a dictionary with keys from the feedback tags liste
 - `UNKNOWN_SYMBOL` Message displayed when the response contains some undefined symbol.
 - `SUM_WITH_INDEPENDENT_TERMS`  Message displayed when the response has too few groups but one (or more) of the groups is a sum with independent terms.
 
+### Default feedback messages
+
+The default feedback messages, including non-customisable ones are listed below:
+
+| Tag                                | Remark                          | Feedback message |
+|------------------------------------|:--------------------------------|:-----------------|
+| `NO_RESPONSE`                      |                                 | "No response submitted." |
+| `NO_ANSWER"                        |                                 | "No answer was given." |
+| `QUANTITIES_NOT_WRITTEN_CORRECTLY` |                                 | "List of quantities not written correctly." |
+| `PARSE_ERROR_WARNING`              | With response expression $E$    | "$E$ could not be parsed as a valid mathematical expression. Ensure that correct notation is used, that the expression is unambiguous and that all parentheses are closed." |
+| `STRICT_SYNTAX_EXPONENTIATION`     |                                 | "Note that `^` cannot be used to denote exponentiation, use `**` instead." |
+| `VALID_CANDIDATE_SET`              | Feedback message is omitted since correctness of the results will be displayed instead | "" |
+| `NOT_DIMENSIONLESS`                | For response with a single group $G$ | "The group $G$ is not dimensionless." |
+| `NOT_DIMENSIONLESS`                | For response where group $G_1 \ldots G_k$ are not dimensionless | "The groups $G_1 \ldots G_k$ and $G_k$ are not dimensionless." |
+| `MORE_GROUPS_THAN_REFERENCE_SET`   |                                 | "Response has more groups than necessary." |
+| `CANDIDATE_GROUPS_NOT_INDEPENDENT` |                                 | "Groups in response are not independent. It has $r$ independent group(s) and contains $n$ groups." |
+| `TOO_FEW_INDEPENDENT_GROUPS`       | With response expression $E$          | "$E$ contains too few independent groups. It has $r$ independent group(s) and needs at least $n$ independent groups." |
+| `UNKNOWN_SYMBOL`                   | With unknown symbols $s_1 \ldots s_k$ | "Unknown symbol(s): $s_1 \ldots s_k$." |
+| `SUM_WITH_INDEPENDENT_TERMS`       | With response expression $E$    | "Sum in $S$ contains more independent terms that there are groups in total. Group expressions should ideally be written as a comma-separated list where each item is an entry of the form $q_1^{c_1} q_2^{c_2}\ldots q_n^{c_n}$." |
+
 ## `elementary_functions`
 
-When using implicit multiplication function names with mulitple characters are sometimes split and not interpreted properly. Setting `elementary_functions` to true will reserve the function names listed below and prevent them from being split. If a name is said to have one or more alternatives this means that it will accept the alternative names but the reserved name is what will be shown in the preview.
+When using implicit multiplication (i.e. when `strict_syntax` is set to true) function names with multiple characters are sometimes split and not interpreted properly, e.g. `sin(x)` might be interpreted as `s*i*n*(x)`. Setting `elementary_functions` to true will reserve the function names listed below and prevent them from being split. If a name is said to have one or more alternatives this means that it will accept the alternative names but the reserved name is what will be shown in the preview.
 
 `sin`, `sinc`, `csc` (alternative `cosec`), `cos`, `sec`, `tan`, `cot` (alternative `cotan`), `asin` (alternative `arcsin`), `acsc` (alternatives `arccsc`, `arccosec`), `acos` (alternative `arccos`), `asec` (alternative `arcsec`), `atan` (alternative `arctan`), `acot` (alternatives `arccot`, `arccotan`), `atan2` (alternative `arctan2`), `sinh`, `cosh`, `tanh`, `csch` (alternative `cosech`), `sech`, `asinh` (alternative `arcsinh`), `acosh` (alternative `arccosh`), `atanh` (alternative `arctanh`), `acsch` (alternatives `arccsch`, `arcosech`), `asech` (alternative `arcsech`), `exp` (alternative `Exp`), `E` (equivalent to `exp(1)`, alternative `e`), `log`, `sqrt`, `sign`, `Abs` (alternative `abs`), `Max` (alternative `max`), `Min` (alternative `min`), `arg`, `ceiling` (alternative `ceil`), `floor`
 
@@ -67,9 +86,11 @@ Default dimensions correspond to the base quantities in Table 1 of the [NIST Gui
 
 ### `strict_syntax`
 
-If `strict_syntax` is set to true then the answer and response must have `*` or `/` between each part of the expressions and exponentiation must be done using `**`, e.g. `a*b/c**2` is accepted but `ab/c^2` is not.
+If `strict_syntax` is set to true then the answer and response must have `*` or `/` between each part of the expressions and exponentiation must be done using `**`.
 
-If `strict_syntax` is set to false, then `*` can be omitted and `^` used instead of `**`, e.g. `a*b/c**2` and `ab/c^2` will be considered identical. In this case it is also recommended to list any multicharacter symbols expected to appear in the response as input symbols.
+For example: with `strict_syntax` set to false `a*b` and `ab` will be interpreted as equivalent, but with `strict_syntax` set to false `ab` will be interpreted as a single symbol instead of a multiplication. 
+
+If `strict_syntax` is set to false, then `^` used instead of `**`, e.g. `c**2` and `c^2` will be considered equivalent. In this case it is also recommended to list any multicharacter symbols expected to appear in the response as input symbols. If `strict_syntax` is set to true then `c^2` will give a warning that `^` will not be interpreted as exponentiation.
 
 By default `strict_syntax` is set to true.
 
