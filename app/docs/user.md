@@ -90,7 +90,7 @@ If `strict_syntax` is set to true then the answer and response must have `*` or 
 
 For example: with `strict_syntax` set to false `a*b` and `ab` will be interpreted as equivalent, but with `strict_syntax` set to false `ab` will be interpreted as a single symbol instead of a multiplication. 
 
-If `strict_syntax` is set to false, then `^` used instead of `**`, e.g. `c**2` and `c^2` will be considered equivalent. In this case it is also recommended to list any multicharacter symbols expected to appear in the response as input symbols. If `strict_syntax` is set to true then `c^2` will give a warning that `^` will not be interpreted as exponentiation.
+If `strict_syntax` is set to false, then `^` used instead of `**`, e.g. `c**2` and `c^2` will be considered equivalent. In this case it is also recommended to list any multi-character symbols expected to appear in the response as input symbols. If `strict_syntax` is set to true then `c^2` will give a warning that `^` will not be interpreted as exponentiation.
 
 By default `strict_syntax` is set to true.
 
@@ -108,7 +108,7 @@ For this problem we do not need to predefine any quantities and give exact dimen
 
 For this example `answer` is set to `U*L/nu`. It is not necessary to use this specific answer, any example of a correct dimensionless group, e.g. `nu/(U*L)`, should work.
 
-With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false. Since `nu` is a multicharacter symbol it needs to be added as a symbol.
+With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false. Since `nu` is a multi-character symbol it needs to be added as a symbol.
 
 #### List of parameter values
 
@@ -134,7 +134,7 @@ This task is similar to example a) with two significant differences. First, addi
 
 For this example an EXPRESSION response area is used with `quantities` set to `('U','(length/time)') ('L','(length)') ('nu','(length**2/time)') ('f','(1/time)')` and `answer` set to `-`.
 
-With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false. Since `nu` is a multicharacter symbol it needs to be added as an input symbol.
+With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false. Since `nu` is a multi-character symbol it needs to be added as an input symbol.
 
 #### List of parameter values
 
@@ -167,7 +167,7 @@ For this example an EXPRESSION response area is used the answer `g**(-2)*v**4*h*
 `    "MORE_GROUPS_THAN_REFERENCE_SET": "Response has more power products than necessary."`,  
 `    "CANDIDATE_GROUPS_NOT_INDEPENDENT": "Power products in response are not independent."`,  
 `    "TOO_FEW_INDEPENDENT_GROUPS": "Candidate set contains too few independent power products."`,  
-`    "UNKNOWN_SYMBOL": "One of the prower products contains an unkown symbol."`,  
+`    "UNKNOWN_SYMBOL": "One of the power products contains an unknown symbol."`,  
 `    "SUM_WITH_INDEPENDENT_TERMS": "The candidate set contains an expression which contains more independent terms than there are power products in total. The candidate set should ideally only contain expressions written as power products."`  
 `}`
 
@@ -182,7 +182,7 @@ With default settings it is required to put `*` (or `/`) between each part of th
     `"MORE_GROUPS_THAN_REFERENCE_SET": "Response has more power products than necessary."`,  
     `"CANDIDATE_GROUPS_NOT_INDEPENDENT": "Power products in response are not independent."`,  
     `"TOO_FEW_INDEPENDENT_GROUPS": "Candidate set contains too few independent power products."`,  
-    `"UNKNOWN_SYMBOL": "One of the prower products contains an unkown symbol."`,  
+    `"UNKNOWN_SYMBOL": "One of the power products contains an unknown symbol."`,  
     `"SUM_WITH_INDEPENDENT_TERMS": "The candidate set contains an expression which contains more independent terms than there are power products in total. The candidate set should ideally only contain expressions written as power products."`  
 }`
 - `strict_syntax`: `false`

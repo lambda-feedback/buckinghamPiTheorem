@@ -512,7 +512,7 @@ class TestEvaluationFunction(unittest.TestCase):
                     "MORE_GROUPS_THAN_REFERENCE_SET": "Response has more power products than necessary.",
                     "CANDIDATE_GROUPS_NOT_INDEPENDENT": "Power products in response are not independent.",
                     "TOO_FEW_INDEPENDENT_GROUPS": "Candidate set contains too few independent groups.",
-                    "UNKNOWN_SYMBOL": "One of the prower products contains an unkown symbol.",
+                    "UNKNOWN_SYMBOL": "One of the power products contains an unknown symbol.",
                     "SUM_WITH_INDEPENDENT_TERMS": "The candidate set contains an expression which contains more independent terms that there are groups in total. The candidate set should ideally only contain expressions written as power products."
                 }
             }
