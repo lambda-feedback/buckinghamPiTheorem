@@ -85,13 +85,20 @@ For this problem we do not need to predefine any quantities and give exact dimen
 
 **Note:** This means that the algorithm does not in any way check that the stated answer is dimensionless, that is left to the task author.
 
-For this example an EXPRESSION response area is used with answer set to `U*L/nu`. It is not necessary to use this specific answer, any example of a correct dimensionless group should work.
+For this example `answer` is set to `U*L/nu`. It is not necessary to use this specific answer, any example of a correct dimensionless group, e.g. `nu/(U*L)`, should work.
 
-With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false. Since `nu` is a multicharacter symbol it needs to be added as an input symbol.
+With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false. Since `nu` is a multicharacter symbol it needs to be added as a symbol.
+
+#### List of parameter values
+
+- `answer`: `U*L/nu`
+- `strict_syntax`: `false`
 
 #### Examples of responses that illustrate the evaluation functions capabilities
 
 - `U*L/nu` a valid group
+- `nu/U/L` a valid group
+- `U^2*L^2/nu^2` a valid group
 - `U*L/nu+1` a valid group
 - `8*U*L/nu` a valid group
 - `q*U*L/nu` a group with an unknown symbol
@@ -107,6 +114,12 @@ This task is similar to example a) with two significant differences. First, addi
 For this example an EXPRESSION response area is used with `quantities` set to `('U','(length/time)') ('L','(length)') ('nu','(length**2/time)') ('f','(1/time)')` and `answer` set to `-`.
 
 With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false. Since `nu` is a multicharacter symbol it needs to be added as an input symbol.
+
+#### List of parameter values
+
+- `answer`: `-`
+- `quantities` : `('U','(length/time)') ('L','(length)') ('nu','(length**2/time)') ('f','(1/time)')`  
+- `strict_syntax`: `false`
 
 #### Examples of responses that illustrate the evaluation functions capabilities
 
@@ -126,18 +139,32 @@ Suppose we are studying water waves that move under the influence of gravity. We
 
 For this problem two dimensionless groups are needed, see the worked solution at the bottom of this example for a terse solution that gives the general form of the dimensionless quantities.
 
-For this example an EXPRESSION response area is used and the answer  `g**(-2)*v**4*h*l**3, g**(-2)*v**4*h**2*l**4` (this corresponds to $p_1 = 1$, $p_2 = 2$, $q_1 = 3$, $q_2 = 4$ in the worked solution shown in the examples module). The feedback was customised by setting the `custom_feedback` parameter too:
-`"custom_feedback": {
-    "VALID_CANDIDATE_SET": "Your list of power products satisfies the Buckingham Pi theorem.",
-    "NOT_DIMENSIONLESS": "At least one power product is not dimensionless.",
-    "MORE_GROUPS_THAN_REFERENCE_SET": "Response has more power products than necessary.",
-    "CANDIDATE_GROUPS_NOT_INDEPENDENT": "Power products in response are not independent.",
-    "TOO_FEW_INDEPENDENT_GROUPS": "Candidate set contains too few independent power products.",
-    "UNKNOWN_SYMBOL": "One of the prower products contains an unkown symbol.",
-    "SUM_WITH_INDEPENDENT_TERMS": "The candidate set contains an expression which contains more independent terms that there are power products in total. The candidate set should ideally only contain expressions written as power products."
-}`
+For this example an EXPRESSION response area is used the answer `g**(-2)*v**4*h*l**3, g**(-2)*v**4*h**2*l**4` (this corresponds to $p_1 = 1$, $p_2 = 2$, $q_1 = 3$, $q_2 = 4$ in the worked solution shown in the examples module). The feedback was customised by setting the `custom_feedback` parameter too:  
+`{`  
+`    "VALID_CANDIDATE_SET": "Your list of power products satisfies the Buckingham Pi theorem."`,  
+`    "NOT_DIMENSIONLESS": "At least one power product is not dimensionless."`,  
+`    "MORE_GROUPS_THAN_REFERENCE_SET": "Response has more power products than necessary."`,  
+`    "CANDIDATE_GROUPS_NOT_INDEPENDENT": "Power products in response are not independent."`,  
+`    "TOO_FEW_INDEPENDENT_GROUPS": "Candidate set contains too few independent power products."`,  
+`    "UNKNOWN_SYMBOL": "One of the prower products contains an unkown symbol."`,  
+`    "SUM_WITH_INDEPENDENT_TERMS": "The candidate set contains an expression which contains more independent terms than there are power products in total. The candidate set should ideally only contain expressions written as power products."`  
+`}`
 
 With default settings it is required to put `*` (or `/`) between each part of the response and answer. To remove this requirement the parameter `strict_syntax` is set to false.
+
+#### List of parameter values
+
+- `answer`: `g**(-2)*v**4*h*l**3, g**(-2)*v**4*h**2*l**4`
+- `custom_feedback` : `{`  
+    `"VALID_CANDIDATE_SET": "Your list of power products satisfies the Buckingham Pi theorem."`,  
+    `"NOT_DIMENSIONLESS": "At least one power product is not dimensionless."`,  
+    `"MORE_GROUPS_THAN_REFERENCE_SET": "Response has more power products than necessary."`,  
+    `"CANDIDATE_GROUPS_NOT_INDEPENDENT": "Power products in response are not independent."`,  
+    `"TOO_FEW_INDEPENDENT_GROUPS": "Candidate set contains too few independent power products."`,  
+    `"UNKNOWN_SYMBOL": "One of the prower products contains an unkown symbol."`,  
+    `"SUM_WITH_INDEPENDENT_TERMS": "The candidate set contains an expression which contains more independent terms than there are power products in total. The candidate set should ideally only contain expressions written as power products."`  
+}`
+- `strict_syntax`: `false`
 
 #### Examples of responses that illustrate the customized feedback messages
 
