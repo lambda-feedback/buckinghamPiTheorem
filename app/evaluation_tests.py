@@ -2,8 +2,8 @@ import unittest
 
 from .evaluation import (
     evaluation_function,
-    buckingham_pi_feedback_responses,
-    parsing_feedback_responses
+    default_buckingham_pi_feedback_messages,
+    default_parsing_feedback_messages
 )
 
 
@@ -88,8 +88,8 @@ class TestEvaluationFunction(unittest.TestCase):
             answer = "U*L/nu"
             response = "U^2*L^2/nu^2"
             result = evaluation_function(response, answer, params)
-            self.assertEqual(parsing_feedback_responses["PARSE_ERROR_WARNING"](response) in result["feedback"], True)
-            self.assertEqual(parsing_feedback_responses["STRICT_SYNTAX_EXPONENTIATION"] in result["feedback"], True)
+            self.assertEqual(default_parsing_feedback_messages["PARSE_ERROR_WARNING"](response) in result["feedback"], True)
+            self.assertEqual(default_parsing_feedback_messages["STRICT_SYNTAX_EXPONENTIATION"] in result["feedback"], True)
 
         with self.subTest(tag="^ in answer"):
             answer = "U^2*L^2/nu^2"
@@ -116,9 +116,9 @@ class TestEvaluationFunction(unittest.TestCase):
         self.assertEqual_input_variations(response, answer, params, False)
         result = evaluation_function(response, answer, params)
         self.assertEqual(
-            buckingham_pi_feedback_responses["UNKNOWN_SYMBOL"](["$p$", "$q$"]) in result["feedback"]
+            default_buckingham_pi_feedback_messages["UNKNOWN_SYMBOL"](["$p$", "$q$"]) in result["feedback"]
             or
-            buckingham_pi_feedback_responses["UNKNOWN_SYMBOL"](["$q$", "$p$"]) in result["feedback"],
+            default_buckingham_pi_feedback_messages["UNKNOWN_SYMBOL"](["$q$", "$p$"]) in result["feedback"],
             True
         )
 
@@ -212,7 +212,7 @@ class TestEvaluationFunction(unittest.TestCase):
         response = "g**(-2)*v**4*h*l**3, g**(-2)*v**4*h**2*l**4, g**(-1)*v**2*h"
         self.assertEqual_input_variations(response, answer, params, False)
         result = evaluation_function(response, answer, params)
-        self.assertEqual(buckingham_pi_feedback_responses["MORE_GROUPS_THAN_REFERENCE_SET"] in result["feedback"], True)
+        self.assertEqual(default_buckingham_pi_feedback_messages["MORE_GROUPS_THAN_REFERENCE_SET"] in result["feedback"], True)
 
     def test_buckingham_pi_two_groups_with_quantities(self):
         params = {
@@ -269,7 +269,7 @@ class TestEvaluationFunction(unittest.TestCase):
         answer = "U*L/nu, f*L/U"
         response = "U*L/nu, U*nu/(f*L**2)"
         result = evaluation_function(response, answer, params)
-        self.assertEqual(buckingham_pi_feedback_responses["NOT_DIMENSIONLESS"]({"$\frac{LU}{\nu}", }) in result["feedback"], True)
+        self.assertEqual(default_buckingham_pi_feedback_messages["NOT_DIMENSIONLESS"]({r"$\frac{U \nu}{L^{2} f}$", }) in result["feedback"], True)
 
     def test_buckingham_pi_two_groups_with_quantities_too_few_independent_groups_in_answer(self):
         params = {
@@ -316,8 +316,8 @@ class TestEvaluationFunction(unittest.TestCase):
         response = "U*L/nu, (U*L/nu)**2"
         self.assertEqual_input_variations(response, answer, params, False)
         result = evaluation_function(response, answer, params)
-        self.assertEqual(buckingham_pi_feedback_responses["CANDIDATE_GROUPS_NOT_INDEPENDENT"](1, 2) in result["feedback"], True)
-        self.assertEqual(buckingham_pi_feedback_responses["TOO_FEW_INDEPENDENT_GROUPS"]("Response", 1, 2) in result["feedback"], True)
+        self.assertEqual(default_buckingham_pi_feedback_messages["CANDIDATE_GROUPS_NOT_INDEPENDENT"](1, 2) in result["feedback"], True)
+        self.assertEqual(default_buckingham_pi_feedback_messages["TOO_FEW_INDEPENDENT_GROUPS"]("Response", 1, 2) in result["feedback"], True)
 
     def test_buckingham_pi_three_groups_with_quantities_with_too_few_independent_groups_in_response(self):
         params = {
@@ -335,7 +335,7 @@ class TestEvaluationFunction(unittest.TestCase):
         response = "fl/U, h/l"
         self.assertEqual_input_variations(response, answer, params, False)
         result = evaluation_function(response, answer, params)
-        self.assertEqual(buckingham_pi_feedback_responses["TOO_FEW_INDEPENDENT_GROUPS"]("Response", 2, 3) in result["feedback"], True)
+        self.assertEqual(default_buckingham_pi_feedback_messages["TOO_FEW_INDEPENDENT_GROUPS"]("Response", 2, 3) in result["feedback"], True)
 
     def test_buckingham_pi_sum_with_dimensional_term(self):
         params = {
@@ -415,7 +415,7 @@ class TestEvaluationFunction(unittest.TestCase):
             response = "U/(omega*D)+F/(rho*D**4*omega**2)"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], False)
-            self.assertEqual(buckingham_pi_feedback_responses["SUM_WITH_INDEPENDENT_TERMS"]("response") in result["feedback"], True)
+            self.assertEqual(default_buckingham_pi_feedback_messages["SUM_WITH_INDEPENDENT_TERMS"]("response") in result["feedback"], True)
 
     def test_buckingham_pi_example_in_examples_module(self):
         with self.subTest(tag="Part a)"):
@@ -443,18 +443,18 @@ class TestEvaluationFunction(unittest.TestCase):
             response = "q*U*L/nu"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], False)
-            self.assertEqual(buckingham_pi_feedback_responses["UNKNOWN_SYMBOL"]({"$q$"}) in result["feedback"], True)
+            self.assertEqual(default_buckingham_pi_feedback_messages["UNKNOWN_SYMBOL"]({"$q$"}) in result["feedback"], True)
             # two dimensionless groups that are not independent
             response = "U*L/nu, nu/U/L"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], False)
-            self.assertEqual(buckingham_pi_feedback_responses["CANDIDATE_GROUPS_NOT_INDEPENDENT"](1, 2) in result["feedback"], True)
-            self.assertEqual(buckingham_pi_feedback_responses["MORE_GROUPS_THAN_REFERENCE_SET"] in result["feedback"], True)
+            self.assertEqual(default_buckingham_pi_feedback_messages["CANDIDATE_GROUPS_NOT_INDEPENDENT"](1, 2) in result["feedback"], True)
+            self.assertEqual(default_buckingham_pi_feedback_messages["MORE_GROUPS_THAN_REFERENCE_SET"] in result["feedback"], True)
             # group that is not dimensionless
             response = "U*L"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], False)
-            self.assertEqual(buckingham_pi_feedback_responses["NOT_DIMENSIONLESS"]({"$L U$", }) in result["feedback"], True)
+            self.assertEqual(default_buckingham_pi_feedback_messages["NOT_DIMENSIONLESS"]({"$L U$", }) in result["feedback"], True)
         with self.subTest(tag="Part b)"):
             params = {
                 "strict_syntax": False,
@@ -478,7 +478,7 @@ class TestEvaluationFunction(unittest.TestCase):
             response = "U*L/nu+f*L/U"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], False)
-            self.assertEqual(buckingham_pi_feedback_responses["SUM_WITH_INDEPENDENT_TERMS"]("response") in result["feedback"], True)
+            self.assertEqual(default_buckingham_pi_feedback_messages["SUM_WITH_INDEPENDENT_TERMS"]("response") in result["feedback"], True)
             # sum that contains two valid groups does count as valid if the total number of groups is sufficient
             response = "U*L/nu+f*L/U, f*L/U"
             result = evaluation_function(response, answer, params)
@@ -487,14 +487,14 @@ class TestEvaluationFunction(unittest.TestCase):
             response = "U*L/nu, f/U"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], False)
-            self.assertEqual(buckingham_pi_feedback_responses["NOT_DIMENSIONLESS"]({r"$\frac{f}{U}$"}) in result["feedback"], True)
+            self.assertEqual(default_buckingham_pi_feedback_messages["NOT_DIMENSIONLESS"]({r"$\frac{f}{U}$"}) in result["feedback"], True)
             response = "L/nu, f/U"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], False)
             self.assertEqual(
-                buckingham_pi_feedback_responses["NOT_DIMENSIONLESS"]([r"$\frac{L}{\nu}$", r"$\frac{f}{U}$"]) in result["feedback"]
+                default_buckingham_pi_feedback_messages["NOT_DIMENSIONLESS"]([r"$\frac{L}{\nu}$", r"$\frac{f}{U}$"]) in result["feedback"]
                 or
-                buckingham_pi_feedback_responses["NOT_DIMENSIONLESS"]([r"$\frac{f}{U}$", r"$\frac{L}{\nu}$"]) in result["feedback"],
+                default_buckingham_pi_feedback_messages["NOT_DIMENSIONLESS"]([r"$\frac{f}{U}$", r"$\frac{L}{\nu}$"]) in result["feedback"],
                 True
             )
         with self.subTest(tag="Part c)"):

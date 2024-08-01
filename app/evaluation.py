@@ -21,7 +21,7 @@ internal_feedback_responses = {
     "QUANTITIES_NOT_WRITTEN_CORRECTLY": "List of quantities not written correctly.",
 }
 
-parsing_feedback_responses = {
+default_parsing_feedback_messages = {
     "PARSE_ERROR_WARNING": lambda x: f"`{x}` could not be parsed as a valid mathematical expression. Ensure that correct notation is used, that the expression is unambiguous and that all parentheses are closed.",
     "STRICT_SYNTAX_EXPONENTIATION": "Note that `^` cannot be used to denote exponentiation, use `**` instead.",
 }
@@ -42,17 +42,15 @@ def convert_to_latex(expr):
         return "$"+latex(expr)+"$"
 
 
-buckingham_pi_feedback_responses = {
+default_buckingham_pi_feedback_messages = {
     "VALID_CANDIDATE_SET": "",
     "NOT_DIMENSIONLESS": feedback_not_dimensionless,
     "MORE_GROUPS_THAN_REFERENCE_SET": "Response has more groups than necessary.",
     "CANDIDATE_GROUPS_NOT_INDEPENDENT": lambda r, n: f"Groups in response are not independent. It has {r} independent group(s) and contains {n} groups.",
     "TOO_FEW_INDEPENDENT_GROUPS": lambda name, r, n: f"{name} contains too few independent groups. It has {r} independent group(s) and needs at least {n} independent groups.",
     "UNKNOWN_SYMBOL": lambda symbols: "Unknown symbol(s): "+", ".join([convert_to_latex(s) for s in symbols])+".",
-    "SUM_WITH_INDEPENDENT_TERMS": lambda s: f"Sum in {convert_to_latex(s)} contains more independent terms that there are groups in total. Group expressions should ideally be written as a comma-separated list where each item is an entry of the form $q_1^{c_1} q_2^{c_2}\ldots q_n^{c_n}$."
+    "SUM_WITH_INDEPENDENT_TERMS": lambda s: f"Sum in {convert_to_latex(s)} contains more independent terms that there are groups in total. Group expressions should ideally be written as a comma-separated list where each item is an entry of the form "+r"$q_1^{c_1} q_2^{c_2}\ldots q_n^\{c_n\}$."
 }
-
-feedback_responses_list = [parsing_feedback_responses, buckingham_pi_feedback_responses]
 
 line_break = "<br>"
 
@@ -74,7 +72,7 @@ def create_power_product(exponents, symbols):
     return prod([s**i for (s, i) in zip(symbols, exponents)])
 
 
-def determine_validity(reference_set, reference_symbols, reference_original_number_of_groups, candidate_set, candidate_symbols, candidate_original_number_of_groups):
+def determine_validity(reference_set, reference_symbols, reference_original_number_of_groups, candidate_set, candidate_symbols, candidate_original_number_of_groups, feedback_messages):
     '''
     Analyses if the given candidate set satisfies the Buckingham Pi theorem assuming that the given reference set does.
     '''
@@ -90,16 +88,16 @@ def determine_validity(reference_set, reference_symbols, reference_original_numb
     if candidate_symbols.issubset(reference_symbols):
         valid = not more_groups_than_reference_set
         if more_groups_than_reference_set:
-            feedback.append(buckingham_pi_feedback_responses["MORE_GROUPS_THAN_REFERENCE_SET"])
+            feedback.append(feedback_messages["MORE_GROUPS_THAN_REFERENCE_SET"])
         valid = valid and candidate_groups_independent
         if not candidate_groups_independent:
-            feedback.append(buckingham_pi_feedback_responses["CANDIDATE_GROUPS_NOT_INDEPENDENT"](C.rank(), len(candidate_set)))
+            feedback.append(feedback_messages["CANDIDATE_GROUPS_NOT_INDEPENDENT"](C.rank(), len(candidate_set)))
         if rank_R_equal_to_rank_D:
             if rank_C_equal_to_rank_D:
-                feedback.append(buckingham_pi_feedback_responses["VALID_CANDIDATE_SET"])
+                feedback.append(feedback_messages["VALID_CANDIDATE_SET"])
             else:
                 valid = False
-                feedback.append(buckingham_pi_feedback_responses["TOO_FEW_INDEPENDENT_GROUPS"]("Response", C.rank(), D.rank()))
+                feedback.append(feedback_messages["TOO_FEW_INDEPENDENT_GROUPS"]("Response", C.rank(), D.rank()))
         else:
             valid = False
             if len(candidate_set) == 1:
@@ -111,9 +109,9 @@ def determine_validity(reference_set, reference_symbols, reference_original_numb
                     Di = R.col_join(exponents)
                     if R.rank() != Di.rank():
                         dimensionless_groups.add(create_power_product(exponents, symbols))
-            feedback.append(buckingham_pi_feedback_responses["NOT_DIMENSIONLESS"](dimensionless_groups))
+            feedback.append(feedback_messages["NOT_DIMENSIONLESS"](dimensionless_groups))
     else:
-        feedback.append(buckingham_pi_feedback_responses["UNKNOWN_SYMBOL"](candidate_symbols.difference(reference_symbols)))
+        feedback.append(feedback_messages["UNKNOWN_SYMBOL"](candidate_symbols.difference(reference_symbols)))
         valid = False
     feedback = [elem.strip() for elem in feedback if len(elem.strip()) > 0]
     return valid, line_break.join(feedback)
@@ -163,16 +161,16 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     # client, it will be fixed after the discussion with other
     # members of the development team
     custom_feedback = params.get("custom_feedback", None)
+    feedback_messages = {**default_parsing_feedback_messages, **default_buckingham_pi_feedback_messages}
     if custom_feedback is not None:
-        for feedback_responses in feedback_responses_list:
-            for key in custom_feedback.keys():
-                if key in feedback_responses.keys():
-                    if isinstance(feedback_responses[key], str):
-                        feedback_responses[key] = custom_feedback[key]
-                    elif callable(feedback_responses[key]):
-                        feedback_responses[key] = wrap_feedback_function(custom_feedback[key])
-                    else:
-                        raise Exception("Cannot handle given costum feedback for "+key)
+        for key in custom_feedback.keys():
+            if key in feedback_messages.keys():
+                if isinstance(feedback_messages[key], str):
+                    feedback_messages[key] = custom_feedback[key]
+                elif callable(feedback_messages[key]):
+                    feedback_messages[key] = wrap_feedback_function(custom_feedback[key])
+                else:
+                    raise Exception("Cannot handle given costum feedback for "+key)
 
     # Uses the preview function to translate latex input to  a
     # sympy compatible representation
@@ -205,9 +203,9 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     remark = ""
     if parameters["strict_syntax"]:
         if "^" in response:
-            remark += parsing_feedback_responses["STRICT_SYNTAX_EXPONENTIATION"]
+            remark += feedback_messages["STRICT_SYNTAX_EXPONENTIATION"]
         if "^" in answer:
-            raise Exception(parsing_feedback_responses["STRICT_SYNTAX_EXPONENTIATION"])
+            raise Exception(feedback_messages["STRICT_SYNTAX_EXPONENTIATION"])
     remark = "" if len(remark) == 0 else line_break+remark
 
     # Parse expressions for groups in response and answer
@@ -222,7 +220,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
         except Exception:
             return Result(
                 is_correct=False,
-                feedback=parsing_feedback_responses["PARSE_ERROR_WARNING"](response)+remark
+                feedback=feedback_messages["PARSE_ERROR_WARNING"](response)+remark
             )
         if isinstance(expr, Add):
             response_groups += list(expr.args)
@@ -246,7 +244,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
             expr = parse_expression(ans, parsing_params).simplify()
             expr = expr.expand(power_base=True, force=True)
         except Exception as e:
-            raise Exception(parsing_feedback_responses["PARSE_ERROR_WARNING"]("The answer")) from e
+            raise Exception(feedback_messages["PARSE_ERROR_WARNING"]("The answer")) from e
         if isinstance(expr, Add):
             answer_groups += list(expr.args)
             answer_number_of_groups += len(list(expr.args))
@@ -311,12 +309,12 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
         # Check that answers are dimensionless
         for k, dimension in enumerate(answer_dimensions):
             if not dimension.is_constant():
-                raise Exception(buckingham_pi_feedback_responses["NOT_DIMENSIONLESS"](answer_groups[k]))
+                raise Exception(feedback_messages["NOT_DIMENSIONLESS"](answer_groups[k]))
 
         # Check that there is a sufficient number of independent groups in the answer
         answer_matrix = get_exponent_matrix(answer_groups, answer_symbols)
         if answer_matrix.rank() < number_of_groups:
-            raise Exception(buckingham_pi_feedback_responses["TOO_FEW_INDEPENDENT_GROUPS"]("Answer", answer_matrix.rank(), number_of_groups))
+            raise Exception(feedback_messages["TOO_FEW_INDEPENDENT_GROUPS"]("Answer", answer_matrix.rank(), number_of_groups))
 
     # Compare symbols used in answer and response
     response_symbols = set()
@@ -327,7 +325,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
         answer_symbols = answer_symbols.union(ans.free_symbols)
     if not response_symbols.issubset(answer_symbols):
         result["is_correct"] = False
-        result["feedback"] = buckingham_pi_feedback_responses["UNKNOWN_SYMBOL"](response_symbols.difference(answer_symbols))
+        result["feedback"] = feedback_messages["UNKNOWN_SYMBOL"](response_symbols.difference(answer_symbols))
         return result
     answer_symbols = list(answer_symbols)
 
@@ -336,16 +334,16 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     reference_symbols = set(answer_symbols)
     candidate_set = set(response_groups)
     candidate_symbols = set(response_symbols)
-    valid, feedback_string = determine_validity(reference_set, reference_symbols, answer_original_number_of_groups, candidate_set, candidate_symbols, response_original_number_of_groups)
+    valid, feedback_string = determine_validity(reference_set, reference_symbols, answer_original_number_of_groups, candidate_set, candidate_symbols, response_original_number_of_groups, feedback_messages)
 
     # Check the special case where one groups expression contains several power products
     answer_matrix = get_exponent_matrix(answer_groups, answer_symbols)
     if answer_matrix.rank() > answer_number_of_groups:
-        raise Exception(buckingham_pi_feedback_responses["SUM_WITH_INDEPENDENT_TERMS"]("answer"))
+        raise Exception(feedback_messages["SUM_WITH_INDEPENDENT_TERMS"]("answer"))
     response_matrix = get_exponent_matrix(response_groups, answer_symbols)
     if response_matrix.rank() > response_original_number_of_groups:
         result["is_correct"] = False
-        result["feedback"] = feedback_string+line_break+buckingham_pi_feedback_responses["SUM_WITH_INDEPENDENT_TERMS"]("response")+remark
+        result["feedback"] = feedback_string+line_break+feedback_messages["SUM_WITH_INDEPENDENT_TERMS"]("response")+remark
         return result
 
     result["is_correct"] = valid
