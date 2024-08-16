@@ -254,7 +254,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
         answer_original_number_of_groups += 1
 
     # Find what different symbols for quantities there are
-    if "quantities" in parameters.keys():
+    if len(parameters.get("quantities", "").strip()) > 0:
         quantities_strings = parameters["quantities"]
         quantities = []
         index = quantities_strings.find("(")

@@ -74,6 +74,34 @@ class TestEvaluationFunction(unittest.TestCase):
         for response in incorrect_responses:
             self.assertEqual_input_variations(response, answer, params, False)
 
+    def test_buckingham_pi_one_group_and_quantities_empty_string(self):
+        answer = "U*L/nu"
+        params = {
+            "symbols": {
+                "nu": {"latex": r"\(\nu\)", "aliases": []},
+                "L": {"latex": r"\(L\)", "aliases": []},
+                "U": {"latex": r"\(U\)", "aliases": []},
+            },
+            "strict_syntax": False,
+            "quantities": " "
+        }
+        correct_responses = ["U*L/nu",
+                             "L*U/nu",
+                             "nu/U/L",
+                             "(U*L/nu)**2",
+                             "2*U*L/nu"]
+        incorrect_responses = ["U*L/n/u",
+                               "1",
+                               "U*L*nu",
+                               "A*U*L/nu",
+                               "A",
+                               "U/nu",
+                               "U*L"]
+        for response in correct_responses:
+            self.assertEqual_input_variations(response, answer, params, True)
+        for response in incorrect_responses:
+            self.assertEqual_input_variations(response, answer, params, False)
+
     def test_warning_inappropriate_symbol(self):
         params = {
             "symbols": {
