@@ -380,7 +380,11 @@ class TestEvaluationFunction(unittest.TestCase):
             response = "f**2*((m*l)/T)"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], True)
-
+        with self.subTest(tag="square root in answer"):
+            answer = "f*sqrt((m*l)/T)"
+            response = "f**2*((m*l)/T)"
+            result = evaluation_function(response, answer, params)
+            self.assertEqual(result["is_correct"], True)
         with self.subTest(tag="fractional power that can be written exactly as a decimal in answer"):
             answer = "f*(((m*l)/T)**0.25)"
             response = "f**4*((m*l)/T)"
@@ -630,7 +634,6 @@ class TestEvaluationFunction(unittest.TestCase):
         self.assertEqual(result["is_correct"], False)
 
     def test_eval_function_can_handle_latex_input_with_comma(self):
-        response = r"\frac{m}{\left(\rho l^{3}\right)}, \frac{v t}{l}"
         answer = "-"
         params = {
             "strict_syntax": False,
@@ -644,9 +647,9 @@ class TestEvaluationFunction(unittest.TestCase):
             },
             "quantities": "('m', '(mass)') ('l', '(length)') ('rho', '(mass/(length**3))') ('v', '(length/time)') ('t', '(time)')",
         }
+        response = r"\frac{m}{\left(\rho l^{3}\right)}, \frac{v t}{l}"
         result = evaluation_function(response, answer, params)
         self.assertEqual(result["is_correct"], True)
-
 
 if __name__ == "__main__":
     unittest.main()
