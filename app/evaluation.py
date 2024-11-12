@@ -209,14 +209,19 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     remark = "" if len(remark) == 0 else line_break+remark
 
     # Parse expressions for groups in response and answer
+    def parse_posify_simplify_and_expand(expr_string):
+        expr = parse_expression(expr_string, parsing_params)
+        pos_expr, pos_substitution_dict = posify(expr)
+        expr = pos_expr.simplify().subs(pos_substitution_dict)
+        expr = expr.expand(power_base=True, force=True)
+        return expr
     response_strings = response.split(',')
     response_number_of_groups = len(response_strings)
     response_original_number_of_groups = len(response_strings)
     response_groups = []
     for res in response_strings:
         try:
-            expr = parse_expression(res, parsing_params).simplify()
-            expr = expr.expand(power_base=True, force=True)
+            expr = parse_posify_simplify_and_expand(res)
         except Exception:
             return Result(
                 is_correct=False,
@@ -241,8 +246,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     answer_original_number_of_groups = 0
     for ans in answer_strings:
         try:
-            expr = parse_expression(ans, parsing_params).simplify()
-            expr = expr.expand(power_base=True, force=True)
+            expr = parse_posify_simplify_and_expand(ans)
         except Exception as e:
             raise Exception(feedback_messages["PARSE_ERROR_WARNING"]("The answer")) from e
         if isinstance(expr, Add):
