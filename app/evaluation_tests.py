@@ -390,16 +390,34 @@ class TestEvaluationFunction(unittest.TestCase):
             response = "f**4*((m*l)/T)"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], True)
-
         with self.subTest(tag="fractional power written as a fraction in answer"):
             answer = "f*(((m*l)/T)**(1/3))"
             response = "f**3*((m*l)/T)"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], True)
-
         with self.subTest(tag="fractional power that that is not an n:th root in answer"):
             answer = "f*(((m*l)/T)**(2/3))"
             response = "f**3*((m*l)/T)**2"
+            result = evaluation_function(response, answer, params)
+            self.assertEqual(result["is_correct"], True)
+        with self.subTest(tag="replacing (x^2)^(1/2) with x in response"):
+            answer = "f*m*l/T"
+            response = "(f**2)**(1/2)*m*l/T"
+            result = evaluation_function(response, answer, params)
+            self.assertEqual(result["is_correct"], True)
+        with self.subTest(tag="replacing (x^2)^(1/2) with x in answer"):
+            answer = "(f**2)**(1/2)*m*l/T"
+            response = "f*m*l/T"
+            result = evaluation_function(response, answer, params)
+            self.assertEqual(result["is_correct"], True)
+        with self.subTest(tag="replacing sqrt(x^2) with x in response"):
+            answer = "f*m*l/T"
+            response = "sqrt(f**2)*m*l/T"
+            result = evaluation_function(response, answer, params)
+            self.assertEqual(result["is_correct"], True)
+        with self.subTest(tag="replacing sqrt(x^2) with x in answer"):
+            answer = "sqrt(f**2)*m*l/T"
+            response = "f*m*l/T"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], True)
 
