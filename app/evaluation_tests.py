@@ -420,6 +420,11 @@ class TestEvaluationFunction(unittest.TestCase):
             response = "f*m*l/T"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], True)
+        with self.subTest(tag="Decimal exponents (potential precision issue)"):
+            answer = "m*l/t**2"
+            response = "m**(49*(1.0/49.0))*l/t**2"
+            result = evaluation_function(response, answer, params)
+            self.assertEqual(result["is_correct"], True)
 
     def test_sums_buckingham_pi(self):
         params = {"strict_syntax": False}
