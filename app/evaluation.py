@@ -60,7 +60,7 @@ def get_exponent_matrix(expressions, symbols):
     for expression in expressions:
         exponents = []
         for symbol in symbols:
-            exponent = expression.as_coeff_exponent(symbol)[1]
+            exponent = expression.as_coeff_exponent(symbol)[1].simplify()
             if exponent == 0:
                 exponent = -expression.subs(symbol, 1/symbol).as_coeff_exponent(symbol)[1]
             exponents.append(exponent)
