@@ -212,7 +212,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     def parse_posify_simplify_and_expand(expr_string):
         expr = parse_expression(expr_string, parsing_params)
         pos_expr, pos_substitution_dict = posify(expr)
-        expr = pos_expr.simplify().subs(pos_substitution_dict)
+        expr = pos_expr.simplify(rational=True).subs(pos_substitution_dict)
         expr = expr.expand(power_base=True, force=True)
         return expr
     response_strings = response.split(',')
