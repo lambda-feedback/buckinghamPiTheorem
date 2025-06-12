@@ -183,6 +183,15 @@ class TestEvaluationFunction(unittest.TestCase):
                 "TOO_FEW_INDEPENDENT_GROUPS": "Candidate set contains too few independent groups.",
                 "UNKNOWN_SYMBOL": "One of the prower products contains an unkown symbol.",
                 "SUM_WITH_INDEPENDENT_TERMS": "The candidate set contains an expression which contains more independent terms that there are groups in total. The candidate set should ideally only contain expressions written as power products."
+            },
+            "custom_feedback_combinations": {
+                "test_case_1": [
+                    [
+                        "CANDIDATE_GROUPS_NOT_INDEPENDENT",
+                        "TOO_FEW_INDEPENDENT_GROUPS"
+                    ],
+                    "Combination 1"
+                ]
             }
         }
         with self.subTest(tag="Valid response"):
@@ -200,6 +209,12 @@ class TestEvaluationFunction(unittest.TestCase):
             result = evaluation_function(response, answer, params)
             self.assertEqual(params["custom_feedback"]["CANDIDATE_GROUPS_NOT_INDEPENDENT"] in result["feedback"], True)
             self.assertEqual(params["custom_feedback"]["TOO_FEW_INDEPENDENT_GROUPS"] in result["feedback"], True)
+        with self.subTest(tag="Too few independent groups with custom combination feedback"):
+            # This corresponds to p1 = 1, p2 = 2, q1 = 1, q2 = 2
+            response = "h*l, h**2*l**2"
+            self.assertEqual_input_variations(response, answer, params, False)
+            result = evaluation_function(response, answer, params)
+            self.assertEqual(params["custom_feedback_combinations"]["test_case_1"][1] in result["feedback"], True)
         with self.subTest(tag="Not dimensionless"):
             # This does not correspond to any consistent values of p1, p2, q1 and q2
             response = "g**1*v**2*h**3*l**4, g**4*v**3*h**2*l**1"

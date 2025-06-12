@@ -13,9 +13,10 @@ class Params(TypedDict):
 class Result(TypedDict):
     is_correct: bool
     feedback: str
+    response_latex: str
+    tags: list
 
-
-internal_feedback_responses = {
+internal_feedback_messages = {
     "NO_RESPONSE": "No response submitted.",
     "NO_ANSWER": "No answer was given.",
     "QUANTITIES_NOT_WRITTEN_CORRECTLY": "List of quantities not written correctly.",
@@ -54,6 +55,42 @@ default_buckingham_pi_feedback_messages = {
 
 line_break = "<br>"
 
+def create_result_from_feedback_data(is_correct, response_latex=None, feedback_data=None, custom_feedback=None):
+    """
+    NOTE: It is assumed that the feedback_data input is in the form
+    [
+        (
+            {"tag_1_1", "tag_1_2", ... , "tag_1_n1,"},
+            "feedback_string_1"
+        ),
+        ...
+        (
+            {"tag_k_1", "tag_k_2", ... , "tag_k_nk,"},
+            "feedback_string_k"
+        ),
+    ]
+    Where the tag sets and feedback string pairs are sorted in order of replacement precedence.
+    """
+    if response_latex is None:
+        response_latex = ""
+    if feedback_data is None:
+        feedback_data = set()
+    if custom_feedback is None:
+        custom_feedback = {}
+    feedback_string_list = []
+    feedback_tags = {tag for (tag, string) in feedback_data}
+    for (tags, string) in custom_feedback:
+        if tags == tags.intersection(feedback_tags):
+            feedback_string_list.append(string)
+            feedback_tags -= tags
+    for (tag, string) in feedback_data:
+        feedback_string_list.append(string)
+    return Result(
+        is_correct=is_correct,
+        response_latex=response_latex,
+        tags=feedback_tags,
+        feedback=line_break.join(feedback_string_list)
+    )
 
 def get_exponent_matrix(expressions, symbols):
     exponents_list = []
@@ -88,16 +125,36 @@ def determine_validity(reference_set, reference_symbols, reference_original_numb
     if candidate_symbols.issubset(reference_symbols):
         valid = not more_groups_than_reference_set
         if more_groups_than_reference_set:
-            feedback.append(feedback_messages["MORE_GROUPS_THAN_REFERENCE_SET"])
+            feedback.append(
+                (
+                    "MORE_GROUPS_THAN_REFERENCE_SET",
+                    feedback_messages["MORE_GROUPS_THAN_REFERENCE_SET"]
+                )
+            )
         valid = valid and candidate_groups_independent
         if not candidate_groups_independent:
-            feedback.append(feedback_messages["CANDIDATE_GROUPS_NOT_INDEPENDENT"](C.rank(), len(candidate_set)))
+            feedback.append(
+                (
+                    "CANDIDATE_GROUPS_NOT_INDEPENDENT",
+                    feedback_messages["CANDIDATE_GROUPS_NOT_INDEPENDENT"](C.rank(), len(candidate_set))
+                )
+            )
         if rank_R_equal_to_rank_D:
             if rank_C_equal_to_rank_D:
-                feedback.append(feedback_messages["VALID_CANDIDATE_SET"])
+                feedback.append(
+                    (
+                        "VALID_CANDIDATE_SET",
+                        feedback_messages["VALID_CANDIDATE_SET"]
+                    )
+                )
             else:
                 valid = False
-                feedback.append(feedback_messages["TOO_FEW_INDEPENDENT_GROUPS"]("Response", C.rank(), D.rank()))
+                feedback.append(
+                    (
+                        "TOO_FEW_INDEPENDENT_GROUPS",
+                        feedback_messages["TOO_FEW_INDEPENDENT_GROUPS"]("Response", C.rank(), D.rank())
+                    )
+                )
         else:
             valid = False
             if len(candidate_set) == 1:
@@ -109,12 +166,21 @@ def determine_validity(reference_set, reference_symbols, reference_original_numb
                     Di = R.col_join(exponents)
                     if R.rank() != Di.rank():
                         dimensionless_groups.add(create_power_product(exponents, symbols))
-            feedback.append(feedback_messages["NOT_DIMENSIONLESS"](dimensionless_groups))
+            feedback.append(
+                (
+                    "NOT_DIMENSIONLESS",
+                    feedback_messages["NOT_DIMENSIONLESS"](dimensionless_groups)
+                )
+            )
     else:
-        feedback.append(feedback_messages["UNKNOWN_SYMBOL"](candidate_symbols.difference(reference_symbols)))
+        feedback.append(
+            (
+                "UNKNOWN_SYMBOL",
+                feedback_messages["UNKNOWN_SYMBOL"](candidate_symbols.difference(reference_symbols))
+            )
+        )
         valid = False
-    feedback = [elem.strip() for elem in feedback if len(elem.strip()) > 0]
-    return valid, line_break.join(feedback)
+    return valid, feedback
 
 
 def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
@@ -127,18 +193,6 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     - `answer` which are the correct answers to compare against.
     - `params` which are any extra parameters that may be useful,
         e.g., error tolerances.
-
-    The output of this function is what is returned as the API response
-    and therefore must be JSON-encodable. It must also conform to the
-    response schema.
-
-    Any standard python library may be used, as well as any package
-    available on pip (provided it is added to requirements.txt).
-
-    The way you wish to structure you code (all in this function, or
-    split into many) is entirely up to you. All that matters are the
-    return types and that evaluation_function() is the main function used
-    to output the evaluation response.
     """
 
     """
@@ -156,10 +210,6 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     # replace the corresponding entries in the feedback response
     # dictionaries, wrapping pure stings in a function that takes
     # an arbitrary number of arguments when necessary
-    # NOTE: Changing the entries in this way is known to cause
-    # undesired behaviour when used in the lambda-feedback web
-    # client, it will be fixed after the discussion with other
-    # members of the development team
     custom_feedback = params.get("custom_feedback", None)
     feedback_messages = {**default_parsing_feedback_messages, **default_buckingham_pi_feedback_messages}
     if custom_feedback is not None:
@@ -170,7 +220,19 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
                 elif callable(feedback_messages[key]):
                     feedback_messages[key] = wrap_feedback_function(custom_feedback[key])
                 else:
-                    raise Exception("Cannot handle given costum feedback for "+key)
+                    raise Exception("Cannot handle given custom feedback for "+key)
+
+    # Transforming the `custom_feedback` and `custom_feedback_combinations`
+    # parameters into the format expected by`create_result_from_feedback_data`
+    custom_feedback = params.get("custom_feedback", {})
+    custom_feedback_combinations = params.get("custom_feedback_combinations", {})
+    custom_feedback_combinations = {frozenset(data[0]): data[1] for (key, data) in custom_feedback_combinations.items()}
+    for (tag, string) in custom_feedback.items():
+        custom_feedback_combinations.update({frozenset([tag]): string})
+    custom_feedback_data = [(set(tags), string) for (tags, string) in custom_feedback_combinations.items()]
+    def custom_feedback_data_sort(e):
+        return len(e[0]) # Sort by number of elements in tag set
+    custom_feedback_data.sort(reverse=True, key=custom_feedback_data_sort)
 
     # Uses the preview function to translate latex input to  a
     # sympy compatible representation
@@ -181,32 +243,51 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     parameters = {"comparison": "expression", "strict_syntax": True}
     parameters.update(params)
 
+    # Create feedback_data list used to keep track of added feedback
+    feedback_data = []
+
     # Raise exceptions when answer or response is missing from input
     if not isinstance(answer, str):
-        raise Exception("No answer was given.")
+        raise Exception(feedback=internal_feedback_responses["NO_ANSWER"])
     if not isinstance(response, str):
-        return Result(is_correct=False, feedback="No response submitted.")
+        feedback_data.append(("NO_RESPONSE", internal_feedback_messages["NO_RESPONSE"]))
+        return create_result_from_feedback_data(
+            is_correct=False,
+            feedback_data=feedback_data,
+            custom_feedback_data=custom_feedback_data
+        )
 
     answer = answer.strip()
     response = response.strip()
     if len(answer) == 0:
         raise Exception(feedback=internal_feedback_responses["NO_ANSWER"])
     if len(response) == 0:
-        return Result(is_correct=False, feedback=internal_feedback_responses["NO_RESPONSE"])
+        feedback_data.append(("NO_RESPONSE", internal_feedback_messages["NO_RESPONSE"]))
+        return create_result_from_feedback_data(
+            is_correct=False,
+            feedback_data=feedback_data,
+            custom_feedback_data=custom_feedback_data
+        )
 
     # Preprocess answer and response to prepare for parsing by sympy
     unsplittable_symbols = names_of_dimensions
     answer, response = preprocess_expression([answer, response], parameters)
     parsing_params = create_sympy_parsing_params(parameters, unsplittable_symbols=unsplittable_symbols)
 
+    # Create list of feedback tags with corresponding lists of input
+    feedback_data = []
+
     # Remark on syntax if necessary
-    remark = ""
     if parameters["strict_syntax"]:
-        if "^" in response:
-            remark += feedback_messages["STRICT_SYNTAX_EXPONENTIATION"]
         if "^" in answer:
             raise Exception(feedback_messages["STRICT_SYNTAX_EXPONENTIATION"])
-    remark = "" if len(remark) == 0 else line_break+remark
+        if "^" in response:
+            feedback_data.append(
+                (
+                    "STRICT_SYNTAX_EXPONENTIATION",
+                    feedback_messages["STRICT_SYNTAX_EXPONENTIATION"]
+                )
+            )
 
     # Parse expressions for groups in response and answer
     def parse_posify_simplify_and_expand(expr_string):
@@ -223,9 +304,16 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
         try:
             expr = parse_posify_simplify_and_expand(res)
         except Exception:
-            return Result(
+            feedback_data.append(
+                (
+                    "PARSE_ERROR_WARNING",
+                    feedback_messages["PARSE_ERROR_WARNING"](response)
+                )
+            )
+            return create_result_from_feedback_data(
                 is_correct=False,
-                feedback=feedback_messages["PARSE_ERROR_WARNING"](response)+remark
+                feedback_data=feedback_data,
+                custom_feedback=custom_feedback_data
             )
         if isinstance(expr, Add):
             response_groups += list(expr.args)
@@ -235,7 +323,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
             response_number_of_groups += 1
     response_latex = [latex(expr) for expr in response_groups]
 
-    result = Result(response_latex=", ".join(response_latex))
+    is_correct = True
 
     if answer == "-":
         answer_strings = []
@@ -328,9 +416,19 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     for ans in answer_groups:
         answer_symbols = answer_symbols.union(ans.free_symbols)
     if not response_symbols.issubset(answer_symbols):
-        result["is_correct"] = False
-        result["feedback"] = feedback_messages["UNKNOWN_SYMBOL"](response_symbols.difference(answer_symbols))
-        return result
+        is_correct = False
+        feedback_data.append(
+            (
+                "UNKNOWN_SYMBOL",
+                feedback_messages["UNKNOWN_SYMBOL"](response_symbols.difference(answer_symbols))
+            )
+        )
+        return create_result_from_feedback_data(
+            is_correct=is_correct,
+            response_latex=response_latex,
+            feedback_data=feedback_data,
+            custom_feedback=custom_feedback_data
+        )
     answer_symbols = list(answer_symbols)
 
     # Checking if the given response is a valid set of groups
@@ -338,7 +436,16 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     reference_symbols = set(answer_symbols)
     candidate_set = set(response_groups)
     candidate_symbols = set(response_symbols)
-    valid, feedback_string = determine_validity(reference_set, reference_symbols, answer_original_number_of_groups, candidate_set, candidate_symbols, response_original_number_of_groups, feedback_messages)
+    is_correct, validity_feedback = determine_validity(
+        reference_set,
+        reference_symbols,
+        answer_original_number_of_groups,
+        candidate_set,
+        candidate_symbols,
+        response_original_number_of_groups,
+        feedback_messages
+    )
+    feedback_data += validity_feedback
 
     # Check the special case where one groups expression contains several power products
     answer_matrix = get_exponent_matrix(answer_groups, answer_symbols)
@@ -346,10 +453,18 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
         raise Exception(feedback_messages["SUM_WITH_INDEPENDENT_TERMS"]("answer"))
     response_matrix = get_exponent_matrix(response_groups, answer_symbols)
     if response_matrix.rank() > response_original_number_of_groups:
-        result["is_correct"] = False
-        result["feedback"] = feedback_string+line_break+feedback_messages["SUM_WITH_INDEPENDENT_TERMS"]("response")+remark
-        return result
+        is_correct = False
+        feedback_data.append(
+            (
+                "SUM_WITH_INDEPENDENT_TERMS",
+                feedback_messages["SUM_WITH_INDEPENDENT_TERMS"]("response")
+            )
+        )
 
-    result["is_correct"] = valid
-    result["feedback"] = feedback_string+remark
+    result = create_result_from_feedback_data(
+        is_correct=is_correct,
+        response_latex=response_latex,
+        feedback_data=feedback_data,
+        custom_feedback=custom_feedback_data
+    )
     return result
