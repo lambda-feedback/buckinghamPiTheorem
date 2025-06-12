@@ -248,7 +248,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
 
     # Raise exceptions when answer or response is missing from input
     if not isinstance(answer, str):
-        raise Exception(feedback=internal_feedback_responses["NO_ANSWER"])
+        raise Exception(feedback=internal_feedback_messages["NO_ANSWER"])
     if not isinstance(response, str):
         feedback_data.append(("NO_RESPONSE", internal_feedback_messages["NO_RESPONSE"]))
         return create_result_from_feedback_data(
@@ -260,7 +260,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
     answer = answer.strip()
     response = response.strip()
     if len(answer) == 0:
-        raise Exception(feedback=internal_feedback_responses["NO_ANSWER"])
+        raise Exception(feedback=internal_feedback_messages["NO_ANSWER"])
     if len(response) == 0:
         feedback_data.append(("NO_RESPONSE", internal_feedback_messages["NO_RESPONSE"]))
         return create_result_from_feedback_data(
@@ -357,7 +357,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
                 quantity = tuple(map(lambda x: parse_expression(x, parsing_params), quantity_strings))
                 quantities.append(quantity)
             except Exception:
-                raise Exception(internal_feedback_responses["QUANTITIES_NOT_WRITTEN_CORRECTLY"])
+                raise Exception(internal_feedback_messages["QUANTITIES_NOT_WRITTEN_CORRECTLY"])
             index = quantities_strings.find('(', index_match+1)
         response_symbols = list(map(lambda x: x[0], quantities))
         answer_symbols = response_symbols
