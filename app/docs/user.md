@@ -28,7 +28,6 @@ The parameter must be set as a dictionary with keys from the feedback tags liste
 
 ### Tags for customisable feedback
 - `PARSE_ERROR_WARNING` Response cannot be parsed as an expression or physical quantity.
-- `PER_FOR_DIVISION` Warns about risk of ambiguity when using `per` instead `/` for division.
 - `STRICT_SYNTAX_EXPONENTIATION` Warns that `^` cannot be used for exponentiation when `strict_syntax` is set to `true`.
 - `VALID_CANDIDATE_SET` Message that is displayed when a response is found to be a valid set of groups. **Note:** setting this will not affect the Correct/Incorrect message, it will only add further text.
 - `NOT_DIMENSIONLESS` Message displayed when at least one groups is not dimensionless.
@@ -37,6 +36,37 @@ The parameter must be set as a dictionary with keys from the feedback tags liste
 - `TOO_FEW_INDEPENDENT_GROUPS` Message displayed when the response contains fewer groups than necessary.
 - `UNKNOWN_SYMBOL` Message displayed when the response contains some undefined symbol.
 - `SUM_WITH_INDEPENDENT_TERMS`  Message displayed when the response has too few groups but one (or more) of the groups is a sum with independent terms.
+
+## `custom_feedback_combinations`
+Custom feedback can be set on a per-task basis. **Note:** Custom feedback only supports fixed strings, this means that for some situations the custom feedback cannot be as detailed as the default feedback.
+
+The `custom_feedback` parameters overrides the feedback for individual tags, it is also possible to override the feedback produced by specific combinations of tags using the `custom_feedback_combinations`. 
+
+The vald format for the parameter is given below. The `CASE_NAME` values must be dinstinct string, but will otherwise be ignored, the tags must come from those listed for the `custom_feedback` parameter.
+
+```
+"custom_feedback_combinations": {
+    "CASE_NAME_1": [
+        [
+            "TAG_1_1",
+            ...
+            "TAG_1_m"
+        ],
+        "FEEDBACK STRING 1"
+    ],
+    ...
+    "CASE_NAME_N": [
+        [
+            "TAG_N_1",
+            ...
+            "TAG_N_k"
+        ],
+        "FEEDBACK STRING N"
+    ]
+}
+```
+
+**Note:** If there are more than one combination of tags present in the result, the tag list with the most members take precedence, e.g. if the results has tags `A, B, C, D` and there is custom feedback set for `A,B,C` and `A,B` then custom feedback for `A,B,C` will be shown together with the default feedback for `D`.
 
 ### Default feedback messages
 
