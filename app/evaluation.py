@@ -2,7 +2,8 @@ from typing import Any, TypedDict
 from sympy import latex, Matrix, Integer, Add, posify, prod
 
 from .buckingham_pi_utilities import names_of_dimensions, find_matching_parenthesis
-from .expression_utilities import preprocess_expression, parse_expression, create_sympy_parsing_params
+from .static_unit_conversion_arrays import convert_SI_base_units_to_dimensions
+from .expression_utilities import preprocess_expression, parse_expression, create_sympy_parsing_params, substitute
 from .preview import preview_function
 
 
@@ -29,7 +30,10 @@ default_parsing_feedback_messages = {
 
 
 def feedback_not_dimensionless(groups):
-    groups = list(groups)
+    if isinstance(groups, set):
+        groups = list(groups)
+    elif not isinstance(groups, list):
+        groups = [groups]
     if len(groups) == 1:
         return f"The group {convert_to_latex(groups[0])} is not dimensionless."
     else:
@@ -269,8 +273,26 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
             custom_feedback_data=custom_feedback_data
         )
 
-    # Preprocess answer and response to prepare for parsing by sympy
+    # Find what different symbols for quantities there are
     unsplittable_symbols = names_of_dimensions
+    if len(parameters.get("quantities", "").strip()) > 0:
+        quantities_strings = parameters["quantities"]
+        substitutions = convert_SI_base_units_to_dimensions
+        quantities = []
+        index = quantities_strings.find("(")
+        while index > -1:
+            index_match = find_matching_parenthesis(quantities_strings, index)
+            try:
+                quantity_strings = eval(quantities_strings[index+1:index_match])
+                for sub in substitutions:
+                    quantity_strings = (quantity_strings[0], substitute(quantity_strings[1], sub))
+                quantities.append(quantity_strings)
+            except Exception:
+                raise Exception(internal_feedback_messages["QUANTITIES_NOT_WRITTEN_CORRECTLY"])
+            index = quantities_strings.find('(', index_match+1)
+        unsplittable_symbols += tuple(quantity[0] for quantity in quantities)
+
+    # Preprocess answer and response to prepare for parsing by sympy
     answer, response = preprocess_expression([answer, response], parameters)
     parsing_params = create_sympy_parsing_params(parameters, unsplittable_symbols=unsplittable_symbols)
 
@@ -347,18 +369,24 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
 
     # Find what different symbols for quantities there are
     if len(parameters.get("quantities", "").strip()) > 0:
-        quantities_strings = parameters["quantities"]
-        quantities = []
-        index = quantities_strings.find("(")
-        while index > -1:
-            index_match = find_matching_parenthesis(quantities_strings, index)
-            try:
-                quantity_strings = eval(quantities_strings[index+1:index_match])
-                quantity = tuple(map(lambda x: parse_expression(x, parsing_params), quantity_strings))
-                quantities.append(quantity)
-            except Exception:
-                raise Exception(internal_feedback_messages["QUANTITIES_NOT_WRITTEN_CORRECTLY"])
-            index = quantities_strings.find('(', index_match+1)
+#        quantities_strings = parameters["quantities"]
+#        substitutions = convert_SI_base_units_to_dimensions
+#        quantities = []
+#        index = quantities_strings.find("(")
+#        while index > -1:
+#            index_match = find_matching_parenthesis(quantities_strings, index)
+#            try:
+#                quantity_strings = eval(quantities_strings[index+1:index_match])
+#                for sub in substitutions:
+#                    quantity_strings = (quantity_strings[0], substitute(quantity_strings[1], sub))
+#                quantity = tuple(map(lambda x: parse_expression(x, parsing_params), quantity_strings))
+#                quantities.append(quantity)
+#            except Exception:
+#                raise Exception(internal_feedback_messages["QUANTITIES_NOT_WRITTEN_CORRECTLY"])
+#            index = quantities_strings.find('(', index_match+1)
+#        response_symbols = list(map(lambda x: x[0], quantities))
+#        answer_symbols = response_symbols
+        quantities = [tuple(map(lambda x: parse_expression(x, parsing_params), quantity)) for quantity in quantities]
         response_symbols = list(map(lambda x: x[0], quantities))
         answer_symbols = response_symbols
 
@@ -396,7 +424,7 @@ def evaluation_function(response: Any, answer: Any, params: Params) -> Result:
             dimension = group
             for quantity in quantities:
                 dimension = dimension.subs(quantity[0], quantity[1])
-            answer_dimensions.append(posify(dimension)[0].simplify())
+            answer_dimensions.append(dimension.simplify())
 
         # Check that answers are dimensionless
         for k, dimension in enumerate(answer_dimensions):

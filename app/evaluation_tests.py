@@ -289,6 +289,30 @@ class TestEvaluationFunction(unittest.TestCase):
         response = "U*L/nu, f*L/U"
         self.assertEqual_input_variations(response, answer, params, True)
 
+    def test_buckingham_pi_two_groups_with_quantities_as_units(self):
+        params = {
+            "strict_syntax": False,
+            "quantities": "('U', '(metre/second)') ('L', '(metre)') ('nu', '(kilometre**2)/(millisecond)') ('f', '(1/day)')",
+            "symbols": {
+                "U": {"latex": r"\(U\)", "aliases": []},
+                "L": {"latex": r"\(L\)", "aliases": []},
+                "nu": {"latex": r"\(\nu\)", "aliases": []},
+                "f": {"latex": r"\(f\)", "aliases": []},
+            },
+        }
+        answer = "U*L/nu, f*L/U"
+        response = "U*L/nu, nu/(f*L**2)"
+        self.assertEqual_input_variations(response, answer, params, True)
+
+    def test_buckingham_pi_two_groups_with_quantities_as_units_no_answer(self):
+        params = {
+            "strict_syntax": False,
+            "quantities": "('F','(gram*metre*second**(-2))') ('U','(metre/second)') ('rho','(gram/(metre**3))') ('D','(metre)') ('omega','(second**(-1))')",
+        }
+        answer = "-"
+        response = "F/(D^2U^2rho),omegaD/U"
+        self.assertEqual_input_variations(response, answer, params, True)
+
     def test_buckingham_pi_two_groups_with_quantities_not_dimensionless(self):
         params = {
             "strict_syntax": False,
@@ -524,7 +548,7 @@ class TestEvaluationFunction(unittest.TestCase):
             response = "U*L"
             result = evaluation_function(response, answer, params)
             self.assertEqual(result["is_correct"], False)
-            self.assertEqual(default_buckingham_pi_feedback_messages["NOT_DIMENSIONLESS"]({"$L U$", }) in result["feedback"], True)
+            self.assertEqual(default_buckingham_pi_feedback_messages["NOT_DIMENSIONLESS"](["$L U$"]) in result["feedback"], True)
         with self.subTest(tag="Part b)"):
             params = {
                 "strict_syntax": False,

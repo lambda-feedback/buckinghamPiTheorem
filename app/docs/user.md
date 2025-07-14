@@ -98,21 +98,143 @@ When using implicit multiplication (i.e. when `strict_syntax` is set to true) fu
 
 String that lists all quantities that can be used in the answer and response.
 
-Each quantity should be written in the form `('quantity name','(dimensions)')` and all pairs concatenated into a single string. See tables below for available default dimensions.
+Each quantity should be written in the form `('quantity name','(dimensions)')` and all pairs concatenated into a single string. See tables below for available dimensions.
 
-#### Table: Base SI units
+**Note:** Quantities can also be defined using common units, but the units names must be written out in full, for example `('l','(length)')` and `('l','(kilometre)')` is equivalent, but `('l','(km)')` will generate an error. For this reason it is recommended that the quantities are specified using the base dimensions instead.
+
+#### Table: SI dimensions
 
 Default dimensions correspond to the base quantities in Table 1 of the [NIST Guide to the SI, Chapter 4: The Two Classes of SI Units and the SI Prefixes](https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-4-two-classes-si-units-and-si-prefixes)
 
-| Dimension name      |
-|---------------------|
-| length              |
-| mass                |
-| time                |
-| electriccurrent     |
-| temperature         |
-| amountofsubstance   |
-| luminousintensity   |
+| Dimension name    |
+|-------------------|
+| length            |
+| mass              |
+| time              |
+| electriccurrent   |
+| temperature       |
+| amountofsubstance |
+| luminousintensity |
+
+#### Table: Base SI units
+
+SI base units based on Table 2 in https://www.bipm.org/documents/20126/41483022/SI-Brochure-9-EN.pdf
+
+Note that gram is used as a base unit instead of kilogram.
+
+| SI base unit | Dimension         |
+|--------------|:------------------|
+| metre        | length            |
+| gram         | mass              |
+| second       | time              |
+| ampere       | electriccurrent   |
+| kelvin       | temperature       |
+| mole         | amountofsubstance |
+| candela      | luminousintensity |
+
+#### Table: SI prefixes
+
+SI prefixes based on Table 7 in https://www.bipm.org/documents/20126/41483022/SI-Brochure-9-EN.pdf
+All prefixes are dimensionless.
+
+| SI Prefix | Factor    | | SI Prefix | Factor     |
+|-----------|:----------|-|-----------|:-----------|
+| yotta     | $10^{24}$ | | deci      | $10^{-1}$  |
+| zetta     | $10^{21}$ | | centi     | $10^{-2}$  |
+| exa'      | $10^{18}$ | | milli     | $10^{-3}$  |
+| peta      | $10^{15}$ | | micro     | $10^{-6}$  |
+| tera      | $10^{12}$ | | nano      | $10^{-9}$  |
+| giga      | $10^{9}$  | | pico      | $10^{-12}$ |
+| mega      | $10^{6}$  | | femto     | $10^{-15}$ |
+| kilo      | $10^{3}$  | | atto      | $10^{-18}$ |
+| hecto     | $10^{2}$  | | zepto     | $10^{-21}$ |
+| deka      | $10^{1}$  | | yocto     | $10^{-24}$ |
+
+#### Table: Derived SI units
+
+Derived SI based on Table 4 in https://www.bipm.org/documents/20126/41483022/SI-Brochure-9-EN.pdf
+
+Note that the function treats radians and steradians as dimensionless values.
+
+| Unit name | Expressed in base SI units                                                       |
+|-----------|:---------------------------------------------------------------------------------|
+| radian    | $(2\pi)^{-1}$                                                                    |
+| steradian | $(4\pi)^{-1}$                                                                    |
+| hertz     | $\mathrm{second}^{-1}$                                                           |
+| newton    | $\mathrm{metre}~\mathrm{kilogram}~\mathrm{second}^{-2}$                          |
+| pascal    | $\mathrm{metre}^{-1}~\mathrm{kilogram}~\mathrm{second}^{-2}$                     |
+| joule     | $\mathrm{metre}^2~\mathrm{kilogram~second}^{-2}$                                 |
+| watt      | $\mathrm{metre}^2~\mathrm{kilogram~second}^{-3}$                                 |
+| coulomb   | $\mathrm{second~ampere}$                                                         |
+| volt      | $\mathrm{metre}^2~\mathrm{kilogram second}^{-3}~\mathrm{ampere}^{-1}$            |
+| farad     | $\mathrm{metre}^{-2}~\mathrm{kilogram}^{-1}~\mathrm{second}^4~\mathrm{ampere}^2$ |
+| ohm       | $\mathrm{metre}^2~\mathrm{kilogram second}^{-3}~\mathrm{ampere}^{-2}$            |
+| siemens   | $\mathrm{metre}^{-2}~\mathrm{kilogram}^{-1}~\mathrm{second}^3~\mathrm{ampere}^2$ |
+| weber     | $\mathrm{metre}^2~\mathrm{kilogram~second}^{-2}~\mathrm{ampere}^{-1}$            |
+| tesla     | $\mathrm{kilogram~second}^{-2} \mathrm{ampere}^{-1}$                             |
+| henry     | $\mathrm{metre}^2~\mathrm{kilogram~second}^{-2}~\mathrm{ampere}^{-2}$            |
+| lumen     | $\mathrm{candela}$                                                               |
+| lux       | $\mathrm{metre}^{-2}~\mathrm{candela}$                                           |
+| becquerel | $\mathrm{second}^{-1}$                                                           |
+| gray      | $\mathrm{metre}^2~\mathrm{second}^{-2}$                                          |
+| sievert   | $\mathrm{metre}^2~\mathrm{second}^{-2}$                                          |
+| katal     | $\mathrm{mole~second}^{-1}$                                                      |
+
+#### Table: Common non-SI units
+
+Commonly used non-SI units based on Table 8 in https://www.bipm.org/documents/20126/41483022/SI-Brochure-9-EN.pdf and Tables 7 and 8 in https://www.bipm.org/documents/20126/41483022/si_brochure_8.pdf
+Note that the function treats angles, neper and bel as dimensionless values.
+
+Note that only the first table in this section has short form symbols defined, the second table does not, this is done to minimize ambiguities when writing units.
+
+| Unit name         | Expressed in SI units                      |
+|-------------------|:-------------------------------------------|
+| minute            | $60~\mathrm{second}$                       |
+| hour              | $3600~\mathrm{second}$                     |
+| degree            | $\frac{1}{360}$                            |
+| liter             | $10^{-3}~\mathrm{metre}^3$                 |
+| metric_ton        | $10^3~\mathrm{kilogram}$                   |
+| neper             | $1$                                        |
+| bel               | $\frac{1}{2}~\ln(10)$                      |
+| electronvolt      | $1.60218 \cdot 10^{-19}~\mathrm{joule}$    |
+| atomic_mass_unit  | $1.66054 \cdot 10^{-27}~\mathrm{kilogram}$ |
+| angstrom          | $10^{-10}~\mathrm{metre}$                  |
+
+| Unit name        | Expressed in SI units                                |
+|------------------|:-----------------------------------------------------|
+| day              | $86400~\mathrm{second}$                              |
+| angleminute      | $\frac{\pi}{10800}$                                  |
+| anglesecond      | $\frac{\pi}{648000}$                                 |
+| astronomicalunit | $149597870700~\mathrm{metre}$                        |
+| nauticalmile     | $1852~\mathrm{metre}$                                |
+| knot             | $\frac{1852}{3600}~\mathrm{metre~second}^{-1}$       |
+| are              | $10^2~\mathrm{metre}^2$                              |
+| hectare          | $10^4~\mathrm{metre}^2$                              |
+| bar              | $10^5~\mathrm{pascal}$                               |
+| barn             | $10^{-28}~\mathrm{metre}$                            |
+| curie            | $3.7 \cdot 10^{10}~\mathrm{becquerel}                |
+| roentgen         | $2.58 \cdot 10^{-4}~\mathrm{kelvin~(kilogram)}^{-1}$ |
+| rad              | $10^{-2}~\mathrm{gray}$                              |
+| rem              | $10^{-2}~\mathrm{sievert}$                           |
+
+#### Table: Imperial units
+
+Commonly imperial units taken from https://en.wikipedia.org/wiki/Imperial_units
+
+| Unit name         | Expressed in SI units                         |
+|-------------------|:----------------------------------------------|
+| inch              | $0.0254~\mathrm{metre}$                       |
+| foot              | $0.3048~\mathrm{metre}$                       |
+| yard              | $0.9144~\mathrm{metre}$                       |
+| mile              | $1609.344~\mathrm{metre}$                     |
+| fluid ounce       | $28.4130625~\mathrm{millilitre}$              |
+| gill              | $142.0653125~\mathrm{millilitre}$             |
+| pint              | $568.26125~\mathrm{millilitre}$               |
+| quart             | $1.1365225~\mathrm{litre}$                    |
+| gallon            | $4546.09~\mathrm{litre}$                      |
+| ounce             | $28.349523125~\mathrm{gram}$                  |
+| pound             | $0.45359237~\mathrm{kilogram}$                |
+| stone             | $6.35029318~\mathrm{kilogram}$                |
 
 ### `strict_syntax`
 
