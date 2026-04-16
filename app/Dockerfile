@@ -14,6 +14,7 @@ COPY evaluation.py ./app/
 COPY evaluation_tests.py ./app/
 COPY expression_utilities.py ./app/
 COPY buckingham_pi_utilities.py ./app/
+COPY static_unit_conversion_arrays.py ./app/
 
 # Copy the preview and testing scripts
 COPY preview.py ./app/
