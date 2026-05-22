@@ -1,47 +1,14 @@
-# Evaluation Function Template Repository
+# Buckingham Pi Theorem
 
-This template repository contains the boilerplate code needed in order to create an AWS Lambda function that can be written by any tutor to grade a response area in any way they like.
+This function evaluates a candidate list of power products (e.g. `U*L/nu`, `p/rho/U^2`) for validity as a set of dimensionless quantities that satisfy the Buckingham Pi theorem. Uses a modified version of the algorithm described in [Automated feedback on student attempts to produce a set of dimensionless power products](https://doi.org/10.6084/m9.figshare.24850131).
+
+For more information, look at the docs [here](https://lambda-feedback.github.io/user-documentation/user_eval_function_docs/buckinghamPiTheorem/) or in `app/docs/`.
 
 This version is specifically for python, however the ultimate goal is to make similar boilerplate repositories in any language, allowing tutors the freedom to code in what they feel most comfortable with.
 
 ## Deployment
 [![Create Release Request](https://img.shields.io/badge/Create%20Release%20Request-blue?style=for-the-badge)](https://github.com/lambda-feedback/buckinghamPiTheorem/issues/new?template=release-request.yml)
 
-## Table of Contents
-- [Evaluation Function Template Repository](#evaluation-function-template-repository)
-  - [Table of Contents](#table-of-contents)
-  - [Repository Structure](#repository-structure)
-  - [Usage](#usage)
-    - [Getting Started](#getting-started)
-  - [How it works](#how-it-works)
-    - [Docker & Amazon Web Services (AWS)](#docker--amazon-web-services-aws)
-    - [Middleware Functions](#middleware-functions)
-    - [GitHub Actions](#github-actions)
-  - [Pre-requisites](#pre-requisites)
-  - [Contact](#contact)
-
-## Repository Structure
-
-```bash
-app/
-    __init__.py
-    evaluation.py # Script containing the main evaluation_function
-    preview.py # Script containing the preview_function
-    docs.md # Documentation page for this function (required)
-    evaluation_tests.py # Unittests for the main evaluation_function
-    preview_tests.py # Unittests for the preview_function
-    requirements.txt # list of packages needed for algorithm.py
-    Dockerfile # for building whole image to deploy to AWS
-
-.github/
-    workflows/
-        test-and-deploy.yml # Testing and deployment pipeline
-
-config.json # Specify the name of the evaluation function in this file
-.gitignore
-```
-
-## Usage
 
 ### Getting Started
 
@@ -62,7 +29,7 @@ config.json # Specify the name of the evaluation function in this file
    - Edit the `app/evaluation_tests.py` and `app/preview_tests.py` files to add tests which get run:
        - Every time you commit to this repo, before the image is built and deployed 
        - Whenever the `healthcheck` command is supplied to the deployed function
-   - Edit the `app/docs.md` file to reflect your changes. This file is baked into the function's image, and is made available using the `docs` command. This feature is used to display this function's documentation on our [Documentation](https://lambda-feedback.github.io/Documentation/) website once it's been hooked up!
+   - Edit the `app/docs/` files to reflect your changes. These files are baked into the function's image, and are made available using the `docs` command. This feature is used to display this function's documentation on our [Documentation](https://lambda-feedback.github.io/Documentation/) website once it's been hooked up!
 
 ---
 
@@ -96,5 +63,3 @@ Although all programming can be done through the GitHub interface, it is recomme
 - GitHub Desktop or the `git` CLI.
 
 - A code editor such as Atom, VS Code, or Sublime.
-
-Copy this template over by clicking **Use this template** button found in the repository on GitHub. Save it to the `lambda-feedback` Organisation.
