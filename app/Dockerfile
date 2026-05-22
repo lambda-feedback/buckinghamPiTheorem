@@ -11,14 +11,14 @@ RUN pip3 install -r requirements.txt
 
 # Copy the evaluation and testing scripts
 COPY evaluation.py ./app/
-COPY evaluation_tests.py ./app/
+COPY evaluation_test.py ./app/
 COPY expression_utilities.py ./app/
 COPY buckingham_pi_utilities.py ./app/
 COPY static_unit_conversion_arrays.py ./app/
 
 # Copy the preview and testing scripts
 COPY preview.py ./app/
-COPY preview_tests.py ./app/
+COPY preview_test.py ./app/
 
 # Copy Documentation
 COPY docs/dev.md ./app/docs/dev.md
