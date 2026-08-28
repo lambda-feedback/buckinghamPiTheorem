@@ -1,9 +1,9 @@
-# Base image that bundles AWS Lambda Python 3.8 image with some middleware functions
-FROM ghcr.io/lambda-feedback/baseevalutionfunctionlayer:main-3.8
+# Base image that bundles AWS Lambda Python 3.12 image with some middleware functions
+FROM ghcr.io/lambda-feedback/baseevalutionfunctionlayer:main-3.12
 
 WORKDIR /app
 
-RUN yum install -y git
+RUN dnf install -y git findutils && dnf clean all
 
 # Copy and install any packages/modules needed for your evaluation script.
 COPY requirements.txt .
