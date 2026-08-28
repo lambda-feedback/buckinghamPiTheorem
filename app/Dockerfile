@@ -3,6 +3,10 @@ FROM ghcr.io/lambda-feedback/baseevalutionfunctionlayer:main-3.12
 
 WORKDIR /app
 
+# The middleware `app` package lives at /app/app (provided by the base image),
+# so /app must be importable for the `app.handler` entrypoint below.
+ENV PYTHONPATH=/app
+
 RUN dnf install -y git findutils && dnf clean all
 
 # Copy and install any packages/modules needed for your evaluation script.
@@ -29,4 +33,4 @@ RUN chmod 644 $(find . -type f)
 RUN chmod 755 $(find . -type d)
 
 # The entrypoint for AWS is to invoke the handler function within the app package
-CMD [ "/app/app.handler" ]
+CMD [ "app.handler" ]

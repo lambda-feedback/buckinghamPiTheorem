@@ -92,7 +92,7 @@ def create_result_from_feedback_data(is_correct, response_latex=None, feedback_d
     return Result(
         is_correct=is_correct,
         response_latex=response_latex,
-        tags=feedback_tags,
+        tags=sorted(feedback_tags),
         feedback=line_break.join(feedback_string_list)
     )
 
