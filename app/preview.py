@@ -166,6 +166,9 @@ def preview_function(response: Any, params: Params) -> Result:
     split into many) is entirely up to you.
     """
 
+    if response == "":
+        return Result(preview=Preview(latex="", sympy=""))
+
     response = sanitise_latex(response)
 
     symbols = params.get("symbols", {})

@@ -37,6 +37,14 @@ class TestPreviewFunction(unittest.TestCase):
         result = preview_function(response, params)
         self.assertEqual(result["preview"]["latex"], "\\frac{L U}{\\nu},~\\frac{L f}{U}")
 
+    def test_empty_string(self):
+        params = {
+            "quantities": "('U','(length/time)') ('L','(length)') ('nu','(length**2/time)') ('f','(1/time)')",
+            "strict_syntax": False
+        }
+        response = ""
+        result = preview_function(response, params)
+        self.assertEqual(result["preview"]["latex"], "")
 
 if __name__ == "__main__":
     unittest.main()
