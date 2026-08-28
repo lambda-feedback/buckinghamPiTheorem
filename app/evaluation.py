@@ -14,7 +14,7 @@ class Params(TypedDict):
 class Result(TypedDict):
     is_correct: bool
     feedback: str
-    response_latex: list
+    response_latex: str
     tags: list
 
 internal_feedback_messages = {
@@ -76,7 +76,9 @@ def create_result_from_feedback_data(is_correct, response_latex=None, feedback_d
     Where the tag sets and feedback string pairs are sorted in order of replacement precedence.
     """
     if response_latex is None:
-        response_latex = []
+        response_latex = ""
+    elif isinstance(response_latex, list):
+        response_latex = ", ".join(response_latex)
     if feedback_data is None:
         feedback_data = set()
     if custom_feedback is None:
